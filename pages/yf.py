@@ -1,31 +1,26 @@
+import pandas as pd
 import streamlit as st
 import yfinance as yf
+import financedatabase as fd
 
-# Text input for ticker
-ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
-
-# Button to fetch live data
-fetch_live = st.button("Fetch Live Data")
-
-# Caching the live data fetching function
 @st.cache_data
-def get_live_data(ticker):
-    try:
-        stock = yf.Ticker(ticker)
-        hist = stock.history(period="1y")  # 1 year of historical data
-        current_price = hist['Close'][-1]
-        return {
-            'current_price': current_price,
-            'historical_prices': hist['Close'],
-            'dates': hist.index
-        }
-    except Exception as e:
-        st.error(f"Error fetching data for {ticker}: {e}")
-        return None
+def load_data():
+    ticker_list = pd.concat([fd.ETFs().select().reset_index()[['symbol', 'name']], fd.Equities().select().reset_index()[['symbol', 'name']]])
+    ticker_list = ticker_list[ticker_list.symbol.notna()]
+    ticker_list['symbol_name'] = ticker_list.symbol +'-' + ticker_list.name
+    return ticker_list
+ticker_list = load_data()
 
-# Fetch and display data when the button is clicked
-if fetch_live:
-    data = get_live_data(ticker)
-    if data:
-        st.write(f"Current Price of {ticker}: ${data['current_price']:.2f}")
-        st.line_chart(data['historical_prices'])  # Visualize historical prices
+with st.sidebar:
+    sel_tickers = st.multiselect('Portfolio Builder', placeholder="Search tickers", options=ticker_list.symbol_name)
+    sel_tickers_list = ticker_list[ticker_list.symbol_name.isin(sel_tickers)].symbol
+
+    cols = st.columns(4)
+    for i, ticker in enumerate(sel_tickers_list):
+        try:
+            cols[i % 4].image('https://logo.clearbit.com/' + yf.Ticker(ticker).info['website'].replace('https://www.',''), width=65)
+        except:
+            cols[i % 4].subheader(ticker)
+        
+           
+
