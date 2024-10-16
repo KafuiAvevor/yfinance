@@ -2,6 +2,8 @@ import pandas as pd
 import streamlit as st
 import yfinance as yf
 import financedatabase as fd
+import datetime as dt
+
 
 @st.cache_data
 def load_data():
@@ -27,9 +29,12 @@ cols = st.columns(2)
 sel_dt1 = cols[0].date_input('Start Date', value=dt.datetime(2024,1,1), format='YYYY-MM-DD')
 sel_dt2 = cols[1].date_input('End Date', format='YYYY-MM-DD')
 
-if len(sel_tickers ! = 0):
+if len(sel_tickers != 0):
     yfdata = yf.sownload(list(sel_tickers_list), start=sel_dt1, end=sel_st2)['Close'].reset_index().melt(id_vars = ['Date'], var_name = 'ticker', value_name='price')
     yfdata['price_start'] = yfdata.groupby('ticker').price.transform('first')
     yfdata['price_pct_daily'] = yfdata.groupby('ticker').price.pct_change()
     yfdata['price_pct'] = (yfdata.price - yfdata.price_start)/ yfdata.price_start
+
+    st.line_chart(yfdata.pivot(index='Date', columns='ticker', values='price_pct'))
+
 
