@@ -4,7 +4,6 @@ import yfinance as yf
 import financedatabase as fd
 import datetime as dt
 
-# Caching the ticker data with a time-to-live (ttl) to refresh periodically
 @st.cache_data(ttl=60*60*24)  # Cache for 1 day
 def load_data():
     ticker_list = pd.concat([fd.ETFs().select().reset_index()[['symbol', 'name']], 
@@ -43,17 +42,23 @@ else:
     # Only fetch data if tickers are selected
     if len(sel_tickers) != 0:
         try:
-            # Fetch historical data from Yahoo Finance
-            yfdata = yf.download(list(sel_tickers_list), start=sel_dt1, end=sel_dt2)['Close'].reset_index().melt(
-                id_vars=['Date'], var_name='ticker', value_name='price')
+            # Create an empty DataFrame to store data for all tickers
+            all_data = pd.DataFrame()
 
-            # Calculate price percentage changes
-            yfdata['price_start'] = yfdata.groupby('ticker').price.transform('first')
-            yfdata['price_pct_daily'] = yfdata.groupby('ticker').price.pct_change()
-            yfdata['price_pct'] = (yfdata.price - yfdata.price_start) / yfdata.price_start
+            # Fetch historical data for each ticker
+            for ticker in sel_tickers_list:
+                ticker_data = yf.Ticker(ticker).history(start=sel_dt1, end=sel_dt2)[['Close']]
+                ticker_data['ticker'] = ticker  # Add ticker column
+                ticker_data = ticker_data.reset_index()  # Reset index to have date as a column
+                all_data = pd.concat([all_data, ticker_data], ignore_index=True)
+
+            # Reshape and calculate percentage changes
+            all_data['price_start'] = all_data.groupby('ticker')['Close'].transform('first')
+            all_data['price_pct_daily'] = all_data.groupby('ticker')['Close'].pct_change()
+            all_data['price_pct'] = (all_data['Close'] - all_data['price_start']) / all_data['price_start']
 
             # Display the percentage change chart
-            st.line_chart(yfdata.pivot(index='Date', columns='ticker', values='price_pct'))
+            st.line_chart(all_data.pivot(index='Date', columns='ticker', values='price_pct'))
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
