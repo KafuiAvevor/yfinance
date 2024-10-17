@@ -4,13 +4,21 @@ import yfinance as yf
 import financedatabase as fd
 import datetime as dt
 
-@st.cache_data(ttl=60*60*24)  # Cache for 1 day
-def load_data():
-    ticker_list = pd.concat([fd.ETFs().select().reset_index()[['symbol', 'name']], 
-                             fd.Equities().select().reset_index()[['symbol', 'name']]])
-    ticker_list = ticker_list[ticker_list.symbol.notna()]
-    ticker_list['symbol_name'] = ticker_list.symbol + '-' + ticker_list.name
-    return ticker_list
+
+# Set the title of the app
+st.title("Stock Data Viewer")
+
+# Fetch data for a specific stock, e.g., Apple (AAPL)
+ticker_symbol = "AAPL"
+ticker = yf.Ticker(ticker_symbol)
+data = ticker.history(period="5d")  # Fetch last 5 days of data
+
+# Display the fetched data in the Streamlit app
+st.header(f"Last 5 Days of {ticker_symbol} Stock Data")
+st.write(data)
+
+# Optionally, you can plot the closing price using Streamlit
+st.line_chart(data['Close'])
 
 # Load ticker list from database
 ticker_list = load_data()
