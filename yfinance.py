@@ -13,6 +13,12 @@ st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
 
 st.title("Black Scholes Pricing Model")
 st.markdown("### By Kafui Avevor")
+volatility = 20.0
+spot_price = 50.0
+strike_price = 55.0
+risk_free_rate = 5.0
+time_to_expiry = 1.0
+number_of_steps = 10
 
 # Sidebar Inputs
 with st.sidebar:
