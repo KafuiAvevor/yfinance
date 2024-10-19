@@ -6,3 +6,5 @@ seaborn
 scipy
 yfinance
 financedatabase
+base64
+BytesIO
