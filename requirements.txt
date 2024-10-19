@@ -5,6 +5,5 @@ matplotlib
 seaborn
 scipy
 yfinance
-financedatabase
 base64
 io
