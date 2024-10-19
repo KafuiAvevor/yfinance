@@ -13,27 +13,39 @@ st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
 
 st.title("Black Scholes Pricing Model")
 st.markdown("### By Kafui Avevor")
-volatility = 20.0
-spot_price = 50.0
-strike_price = 55.0
-risk_free_rate = 5.0
-time_to_expiry = 1.0
-number_of_steps = 10
+
+
+# Sidebar Inputs
+import streamlit as st
+import yfinance as yf
+import numpy as np
+from scipy.stats import norm
 
 # Sidebar Inputs
 with st.sidebar:
     st.write("### Data Input Method")
     data_input_method = st.radio("Choose Data Input Method", ("Manual Input", "Live Data from Yahoo Finance"))
-    
+
+    # Initialize session state for parameters if not already set
+    if 'spot_price' not in st.session_state:
+        st.session_state.spot_price = 50.00
+    if 'strike_price' not in st.session_state:
+        st.session_state.strike_price = 55.00
+    if 'risk_free_rate' not in st.session_state:
+        st.session_state.risk_free_rate = 5.0
+    if 'time_to_expiry' not in st.session_state:
+        st.session_state.time_to_expiry = 1.00
+    if 'volatility' not in st.session_state:
+        st.session_state.volatility = 20.0
+
     if data_input_method == "Manual Input":
         st.write("#### Manual Input Parameters")
         col1, col2 = st.columns(2)
-        spot_price = col1.number_input("Spot Price ($)", min_value=0.00, value=50.00, step=0.1, help="Current price of the underlying asset")
-        strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=55.00, step=0.1, help="Strike price of the option")
-        risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=5.0, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
-        time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=1.00, step=0.1, help="Time until option expires in years")
-        volatility = col2.number_input("Volatility (%)", min_value=0.00, value=20.0, step=0.1, help="Annualized volatility in percentage (e.g., 20 for 20%)")
-        number_of_steps = col2.number_input("Number of Steps for Heatmap", min_value=1, value=10, step=1, help="Number of steps for generating heatmap")
+        st.session_state.spot_price = col1.number_input("Spot Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Current price of the underlying asset")
+        st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
+        st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
+        st.session_state.time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=st.session_state.time_to_expiry, step=0.1, help="Time until option expires in years")
+        st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualized volatility in percentage (e.g., 20 for 20%)")
     else:
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
@@ -53,62 +65,48 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
-            
+
             live_data = get_live_data(ticker)
             if live_data:
-                spot_price = live_data['current_price']
+                st.session_state.spot_price = live_data['current_price']
+                
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
                     log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
                     volatility = log_returns.std() * np.sqrt(252)  # Annualize
                     return volatility
-                
-                volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-                
+
+                st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
+
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
-                st.write(f"**Current Spot Price:** ${spot_price:,.2f}")
-                st.write(f"**Historical Volatility:** {volatility:,.2f}%")
+                st.write(f"**Current Spot Price:** ${st.session_state.spot_price:,.2f}")
+                st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
                 st.write("#### Last 5 Days of Closing Prices")
                 st.dataframe(live_data['historical_prices'].tail())
-                
+
                 # Allow user to input or adjust other parameters
                 col1, col2 = st.columns(2)
-                strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=spot_price, step=0.1, help="Strike price of the option")
-                risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=5.0, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
-                time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=1.00, step=0.1, help="Time until option expires in years")
-                number_of_steps = col2.number_input("Number of Steps for Heatmap", min_value=1, value=10, step=1, help="Number of steps for generating heatmap")
-    
+                st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Strike price of the option")
+                st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
+                st.session_state.time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=st.session_state.time_to_expiry, step=0.1, help="Time until option expires in years")
+
     st.markdown("---")
     st.header("Heatmap Parameters")
     col1, col2 = st.columns(2)
-    min_vol = col1.slider("Min Volatility (%)", 0.00, 100.00, float(volatility)*0.5, step=0.1)
-    max_vol = col2.slider("Max Volatility (%)", 0.00, 100.00, float(volatility)*1.5, step=0.1)
-    min_spot = col1.number_input("Min Spot Price ($)", 0.00, 10000.00, float(spot_price)*0.5, step=0.1)
-    max_spot = col2.number_input("Max Spot Price ($)", 0.00, 10000.00, float(spot_price)*1.5, step=0.1)
+    min_vol = col1.slider("Min Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 0.5, step=0.1)
+    max_vol = col2.slider("Max Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 1.5, step=0.1)
+    min_spot = col1.number_input("Min Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 0.5, step=0.1)
+    max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.5, step=0.1)
 
 # Black Scholes Model Function
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
-    """
-    Calculates the Black-Scholes option price.
-    
-    Args:
-        spot_price (float): Current price of the underlying asset.
-        strike_price (float): Strike price of the option.
-        risk_free_rate (float): Annual risk-free interest rate (in percentage).
-        time_to_expiry (float): Time to expiry in years.
-        volatility (float): Annualized volatility (in percentage).
-        option_type (str, optional): "call" or "put". Defaults to "call".
-        
-    Returns:
-        float: Option price.
-    """
     # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
     volatility_decimal = volatility / 100
-    
+
     d1 = (np.log(spot_price / strike_price) + (risk_free_rate_decimal + volatility_decimal**2 / 2) * time_to_expiry) / (volatility_decimal * np.sqrt(time_to_expiry))
     d2 = d1 - volatility_decimal * np.sqrt(time_to_expiry)
-    
+
     if option_type == "call":
         price = spot_price * norm.cdf(d1) - strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2)
     elif option_type == "put":
@@ -118,8 +116,9 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     return price
 
 # Calculate Prices
-call_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call")
-put_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="put")
+call_price = black_scholes(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
+put_price = black_scholes(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
+
 
 # Display the option price
 st.write("### Option Price (European)")
@@ -131,17 +130,18 @@ col2.metric(label="European Put Price", value=f"${put_price:,.3f}")
 st.write("### Heatmaps of European Call and Put Prices with Spot Price and Volatility")
 
 # Define heatmap resolution based on user input
-spot_range = np.linspace(min_spot, max_spot, number_of_steps)  # Dynamic steps based on user input
-volatility_range = np.linspace(min_vol, max_vol, number_of_steps)
+spot_range = np.linspace(min_spot, max_spot, 10)  
+volatility_range = np.linspace(min_vol, max_vol, 10)
 
 # Create 2D arrays for call and put prices based on spot prices and volatilities
 call_prices = np.zeros((len(volatility_range), len(spot_range)))
 put_prices = np.zeros((len(volatility_range), len(spot_range)))
 
+# Calculate call and put prices for each combination of volatility and spot price
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
-        call_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol, option_type="call")
-        put_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol, option_type="put")
+        call_prices[i, j] = black_scholes(spot, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="call")
+        put_prices[i, j] = black_scholes(spot, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="put")
 
 # Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(20, 8))
@@ -179,9 +179,10 @@ def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     buf = BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
-    
+
     # Encode to base64
     b64 = base64.b64encode(buf.read()).decode()
+    plt.close(fig)  # Close the figure to free memory
     return f'data:image/png;base64,{b64}'
 
 # Add download buttons
@@ -195,26 +196,13 @@ if st.button("Download Put Price Heatmap"):
 
 # Calculate the Greeks
 def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility):
-    """
-    Calculates the Greeks for European options.
-    
-    Args:
-        spot_price (float): Current price of the underlying asset.
-        strike_price (float): Strike price of the option.
-        risk_free_rate (float): Annual risk-free interest rate (in percentage).
-        time_to_expiry (float): Time to expiry in years.
-        volatility (float): Annualized volatility (in percentage).
-        
-    Returns:
-        dict: Dictionary containing Greeks.
-    """
     # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
     volatility_decimal = volatility / 100
-    
+
     d1 = (np.log(spot_price / strike_price) + (risk_free_rate_decimal + (volatility_decimal**2) / 2) * time_to_expiry) / (volatility_decimal * np.sqrt(time_to_expiry))
     d2 = d1 - volatility_decimal * np.sqrt(time_to_expiry)
-    
+
     delta_call = norm.cdf(d1)
     delta_put = norm.cdf(d1) - 1
     gamma = norm.pdf(d1) / (spot_price * volatility_decimal * np.sqrt(time_to_expiry))
@@ -222,10 +210,10 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
                   - risk_free_rate_decimal * strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2))
     theta_put = (- (spot_price * norm.pdf(d1) * volatility_decimal) / (2 * np.sqrt(time_to_expiry))
                  + risk_free_rate_decimal * strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2))
-    rho_call = strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2) / 100  # Divided by 100 to represent per 1%
+    rho_call = strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2) / 100  
     rho_put = -strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2) / 100
-    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry) / 100  # Divided by 100 to represent per 1%
-    
+    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry) / 100  
+
     return {
         'delta_call': delta_call,
         'delta_put': delta_put,
@@ -237,7 +225,7 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
         'vega': vega
     }
 
-greeks = calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility)
+greeks = calculate_greeks(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 
 # Display the Greeks
 st.write("### Greeks")
