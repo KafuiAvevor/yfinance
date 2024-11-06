@@ -212,7 +212,7 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
                  + risk_free_rate_decimal * strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2))
     rho_call = strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2) / 100  
     rho_put = -strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2) / 100
-    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry) / 100  
+    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry)   
 
     return {
         'delta_call': delta_call,
