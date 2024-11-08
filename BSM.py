@@ -14,13 +14,6 @@ st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
 st.title("Black Scholes Pricing Model")
 st.markdown("### By Kafui Avevor")
 
-
-# Sidebar Inputs
-import streamlit as st
-import yfinance as yf
-import numpy as np
-from scipy.stats import norm
-
 # Sidebar Inputs
 with st.sidebar:
     st.write("### Data Input Method")
