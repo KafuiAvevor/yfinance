@@ -26,8 +26,8 @@ with st.sidebar:
         st.session_state.strike_price = 55.00
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
-    if 'time_to_expiry' not in st.session_state:
-        st.session_state.time_to_expiry = 1.00
+    if 'time_to_expiry' not in st.session_state: #change to days
+        st.session_state.time_to_expiry = 1.00 
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
 
