@@ -78,6 +78,7 @@ with st.sidebar:
             live_data = get_live_data(ticker)
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
+                st.session_state.currency = live_data['currency']
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
