@@ -46,6 +46,8 @@ with st.sidebar:
         st.session_state.volatility = 20.0
     if 'number_of_steps' not in st.session_state:
         st.session_state.number_of_steps = 100
+    if 'currency' not in st.session_state:
+        st.session_state.currency = 'USD'
 
     if data_input_method == "Manual Input":
         st.write("#### Manual Input Parameters")
@@ -53,6 +55,7 @@ with st.sidebar:
         st.session_state.spot_price = col1.number_input("Spot Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Current price of the underlying asset")
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
         st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
+        st.session_state.currency = col1.text_input("Currency", value = USD)
         st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
@@ -71,11 +74,13 @@ with st.sidebar:
             def get_live_data(ticker):
                 try:
                     stock = yf.Ticker(ticker)
+                    currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close']
+                        'currency': currency
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
@@ -84,6 +89,7 @@ with st.sidebar:
             live_data = get_live_data(ticker)
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
+                st.session_state.currency = live_data['currency']
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
@@ -165,8 +171,8 @@ american_put_price =  binomial_american_option(st.session_state.spot_price, st.s
 # Display the option price
 st.write("### Option Price (American)")
 col1, col2 = st.columns(2)
-col1.metric(label="American Call Price", value=f"${american_call_price:,.3f}")
-col2.metric(label="American Put Price", value=f"${american_put_price:,.3f}")
+col1.metric(label="American Call Price", value=f"st.session_state.currency{american_call_price:,.3f}")
+col2.metric(label="American Put Price", value=f"st.session_state.currency{american_put_price:,.3f}")
 
 # Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
 st.write("### Heatmaps of American Call and Put Prices with Spot Price and Volatility")
