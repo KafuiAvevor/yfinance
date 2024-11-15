@@ -31,7 +31,7 @@ with st.sidebar:
     if 'maturity_date' not in st.session_state:
         st.session_state.maturity_date = dt.today() + td(weeks=1)
     if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
-        (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date)))/252
+        st.session_state.time_to_expiry= (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date)))/252
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
 
