@@ -33,7 +33,7 @@ with st.sidebar:
     if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
         (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date)))/252
     if 'volatility' not in st.session_state:
-        st.session_state.volatility = 30.0
+        st.session_state.volatility = 20.0
 
     if data_input_method == "Manual Input":
         st.write("#### Manual Input Parameters")
