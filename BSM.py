@@ -62,15 +62,18 @@ with st.sidebar:
             def get_live_data(ticker):
                 try:
                     stock = yf.Ticker(ticker)
+                    currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
                     return {
                         'current_price': current_price,
-                        'historical_prices': hist['Close']
+                        'historical_prices': hist['Close'],
+                        'currency': currency
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
+            
 
             live_data = get_live_data(ticker)
             if live_data:
