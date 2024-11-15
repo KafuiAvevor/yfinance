@@ -171,8 +171,8 @@ american_put_price =  binomial_american_option(st.session_state.spot_price, st.s
 # Display the option price
 st.write("### Option Price (American)")
 col1, col2 = st.columns(2)
-col1.metric(label="American Call Price", value=f"{st.session_state.currency}""{american_call_price:,.3f}")
-col2.metric(label="American Put Price", value=f"{st.session_state.currency}""{american_put_price:,.3f}")
+col1.metric(label="American Call Price", value=f"{st.session_state.currency}{american_call_price:,.3f}")
+col2.metric(label="American Put Price", value=f"{st.session_state.currency}{american_put_price:,.3f}")
 
 # Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
 st.write("### Heatmaps of American Call and Put Prices with Spot Price and Volatility")
