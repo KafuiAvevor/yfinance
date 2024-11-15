@@ -136,8 +136,8 @@ put_price = black_scholes(st.session_state.spot_price, st.session_state.strike_p
 # Display the option price
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
-col1.metric(label="European Call Price", value=f"${call_price:,.3f}")
-col2.metric(label="European Put Price", value=f"${put_price:,.3f}")
+col1.metric(label="European Call Price", value=f"{st.session_state.currency.upper()} {call_price:,.3f}")
+col2.metric(label="European Put Price", value=f"{st.session_state.currency.upper()} {put_price:,.3f}")
 
 # Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
 st.write("### Heatmaps of European Call and Put Prices with Spot Price and Volatility")
