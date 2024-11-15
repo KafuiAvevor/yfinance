@@ -79,7 +79,7 @@ with st.sidebar:
                     current_price = hist['Close'][-1]
                     return {
                         'current_price': current_price,
-                        'historical_prices': hist['Close']
+                        'historical_prices': hist['Close'],
                         'currency': currency
                     }
                 except Exception as e:
