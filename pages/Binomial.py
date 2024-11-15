@@ -100,7 +100,7 @@ with st.sidebar:
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
 
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
-                st.write(f"**Current Spot Price:** ${st.session_state.spot_price:,.2f}")
+                st.write(f"**Current Spot Price:** {st.session_state.currency}{st.session_state.spot_price:,.2f}")
                 st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
                 st.write("#### Last 5 Days of Closing Prices")
                 st.dataframe(live_data['historical_prices'].tail())
