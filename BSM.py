@@ -37,6 +37,8 @@ with st.sidebar:
         st.session_state.time_to_expiry = business_days_to_expiry / 252
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
+    if 'currency' not in st.session_state:
+        st.session_state.currency = 'USD'
 
     if data_input_method == "Manual Input":
         st.write("#### Manual Input Parameters")
