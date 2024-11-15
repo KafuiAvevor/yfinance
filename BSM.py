@@ -7,6 +7,8 @@ from scipy.stats import norm
 import yfinance as yf
 import base64
 from io import BytesIO
+from datetime import datetime as dt, timedelta as td
+
 
 # Set page configuration
 st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
@@ -26,8 +28,10 @@ with st.sidebar:
         st.session_state.strike_price = 55.00
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
+    if 'maturity_date' not in st.session_state:
+        st.session_state.maturity_date = dt.today() + td(weeks=1)
     if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
-        st.session_state.time_to_expiry = 1.00 
+        (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date)))/252
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
 
@@ -37,7 +41,8 @@ with st.sidebar:
         st.session_state.spot_price = col1.number_input("Spot Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Current price of the underlying asset")
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
         st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
-        st.session_state.time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=st.session_state.time_to_expiry, step=0.1, help="Time until option expires in years")
+        st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
+        st.session_state.time_to_expiry = (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date)))/252
         st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualised volatility in percentage (e.g., 20 for 20%)")
     else:
         st.write("#### Fetch Live Data")
@@ -81,7 +86,8 @@ with st.sidebar:
                 col1, col2 = st.columns(2)
                 st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Strike price of the option")
                 st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
-                st.session_state.time_to_expiry = col2.number_input("Time to Expiry (Years)", min_value=0.00, value=st.session_state.time_to_expiry, step=0.1, help="Time until option expires in years")
+                st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today().strftime('%Y-%m-%d'), value=st.session_state.maturity_date, help="Date at which the option matures")
+                st.session_state.time_to_expiry = (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date))) /252
 
     st.markdown("---")
     st.header("Heatmap Parameters")
