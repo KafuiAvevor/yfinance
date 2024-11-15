@@ -31,10 +31,7 @@ with st.sidebar:
     if 'maturity_date' not in st.session_state:
         st.session_state.maturity_date = dt.today() + td(weeks=1)
     if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
-        today_str = str(dt.today().date())
-        maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = np.busday_count(today_str, maturity_str)
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
+        st.session_state.time_to_expiry = (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date))) /252
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
 
@@ -45,10 +42,7 @@ with st.sidebar:
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
         st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
         st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
-        today_str = str(dt.today().date())
-        maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date))
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
+        st.session_state.time_to_expiry = (np.busday_count(str(dt.today().date()), str(st.session_state.maturity_date))) /252
         st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualised volatility in percentage (e.g., 20 for 20%)")
     else:
         st.write("#### Fetch Live Data")
