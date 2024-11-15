@@ -33,7 +33,7 @@ with st.sidebar:
     if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = np.busday_count(today_str, maturity_str)
+        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
         st.session_state.time_to_expiry = business_days_to_expiry / 252
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
@@ -47,7 +47,7 @@ with st.sidebar:
         st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = np.busday_count(today_str, maturity_str)
+        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
         st.session_state.time_to_expiry = business_days_to_expiry / 252
         st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualised volatility in percentage (e.g., 20 for 20%)")
     else:
@@ -95,7 +95,7 @@ with st.sidebar:
                 st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
                 today_str = str(dt.today().date())
                 maturity_str = str(st.session_state.maturity_date)
-                business_days_to_expiry = np.busday_count(today_str, maturity_str)
+                business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
                 st.session_state.time_to_expiry = business_days_to_expiry / 252
 
     st.markdown("---")
