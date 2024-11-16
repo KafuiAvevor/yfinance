@@ -35,8 +35,12 @@ with st.sidebar:
         st.session_state.strike_price = 55.00
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
+    def next_friday():
+        today = dt.today()
+        days_until_friday = (4 - today.weekday()) % 7  # 4 represents Friday (0 = Monday, 1 = Tuesday, ..., 4 = Friday)
+        return today + td(days=days_until_friday)
     if 'maturity_date' not in st.session_state:
-        st.session_state.maturity_date = dt.today() + td(weeks=1)
+        st.session_state.maturity_date = next_friday()
     if 'time_to_expiry' not in st.session_state:
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
