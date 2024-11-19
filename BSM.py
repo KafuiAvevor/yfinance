@@ -75,8 +75,8 @@ with st.sidebar:
                         else: 
                             st.session_state.risk_free_rate = yf.Ticker("^TNX")
                     except Exception as e:
-                    st.error(f"Error fetching data for {ticker}: {e}")
-                    return None
+                        st.error(f"Error fetching data for {ticker}: {e}")
+                        return None
 
                     return {
                         'current_price': current_price,
