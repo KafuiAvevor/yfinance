@@ -69,9 +69,6 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
-                
-                    
-
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
@@ -96,7 +93,7 @@ with st.sidebar:
                     return volatility
 
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-                if st.session_state.time_to_expiry <= 252:
+                if st.session_state.time_to_expiry <= 1:
                     st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
                 else:
                     st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
