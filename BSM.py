@@ -57,6 +57,12 @@ with st.sidebar:
         st.session_state.time_to_expiry = business_days_to_expiry / 252
         st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualised volatility in percentage (e.g., 20 for 20%)")
     else:
+        st.write("#### Manual Input Parameters")
+        col1, col2 = st.columns(2)
+        st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
+        st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
+
+        
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
         fetch_live = st.button("Fetch Live Data")
