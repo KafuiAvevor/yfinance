@@ -75,12 +75,12 @@ with st.sidebar:
                         else: 
                             st.session_state.risk_free_rate = yf.Ticker("^TNX")
 
-                    return {
-                        'current_price': current_price,
-                        'historical_prices': hist['Close'],
-                        'currency': currency,
-                        'risk_free_rate' : st.session_state.risk_free_rate
-                    }
+                return {
+                    'current_price': current_price,
+                    'historical_prices': hist['Close'],
+                    'currency': currency,
+                    'risk_free_rate' : st.session_state.risk_free_rate
+                }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
