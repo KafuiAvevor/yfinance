@@ -86,6 +86,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
+                st.session_state.risk_free_rate = yf.Ticker("^IRX")
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
@@ -95,10 +96,7 @@ with st.sidebar:
 
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
                       
-                if st.session_state.time_to_expiry <= 252:
-                    st.session_state.risk_free_rate = yf.Ticker("^IRX")
-                else: 
-                    st.session_state.risk_free_rate = yf.Ticker("^TNX")
+                
                 
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
                 st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
