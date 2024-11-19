@@ -69,6 +69,7 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
+                
                     
 
                     return {
@@ -86,7 +87,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
-                st.session_state.risk_free_rate = yf.Ticker("^IRX")
+
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
@@ -113,6 +114,11 @@ with st.sidebar:
                 maturity_str = str(st.session_state.maturity_date)
                 business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
                 st.session_state.time_to_expiry = business_days_to_expiry / 252
+                if st.session_state.time_to_expiry <= 252:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+                else:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
+
 
     st.markdown("---")
     st.header("Heatmap Parameters")
