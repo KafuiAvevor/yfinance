@@ -101,24 +101,24 @@ with st.sidebar:
             st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
 
                 
-                # Function to calculate historical volatility
-                def calculate_historical_volatility(historical_prices):
-                    log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
-                    volatility = log_returns.std() * np.sqrt(252)  # Annualise
-                    return volatility
+            # Function to calculate historical volatility
+            def calculate_historical_volatility(historical_prices):
+                log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
+                volatility = log_returns.std() * np.sqrt(252)  # Annualise
+                return volatility
 
-                st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-                if st.session_state.time_to_expiry <= 1:
-                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
-                else:
-                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
+            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
+            if st.session_state.time_to_expiry <= 1:
+                st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+            else:
+                st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
                     
-                st.success(f"Live data for {ticker.upper()} fetched successfully!")
-                st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
-                st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
-                st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
-                st.write("#### Last 5 Days of Closing Prices")
-                st.dataframe(live_data['historical_prices'].tail())
+            st.success(f"Live data for {ticker.upper()} fetched successfully!")
+            st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
+            st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
+            st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+            st.write("#### Last 5 Days of Closing Prices")
+            st.dataframe(live_data['historical_prices'].tail())
 
 
     st.markdown("---")
