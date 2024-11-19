@@ -89,16 +89,17 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
-        st.write("#### Manual Input Parameters")
-        col1, col2 = st.columns(2)
-        st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
-        st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
+            
 
+            live_data = get_live_data(ticker)
+            if live_data:
+                st.session_state.spot_price = live_data['current_price']
+                st.session_state.currency = live_data['currency']
+            st.write("#### Manual Input Parameters")
+            col1, col2 = st.columns(2)
+            st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
+            st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
 
-        live_data = get_live_data(ticker)
-        if live_data:
-            st.session_state.spot_price = live_data['current_price']
-            st.session_state.currency = live_data['currency']
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
