@@ -69,10 +69,15 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
+                    if st.session_state.time_to_expiry <= 252:
+                        st.session_state.risk_free_rate = yf.Ticker("^IRX")
+                    else: st.session_state.risk_free_rate = yf.Ticker("^TNX")
+
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
-                        'currency': currency
+                        'currency': currency,
+                        'risk_free_rate' : st.session_state.risk_free_rate
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
@@ -83,6 +88,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
+                st.session_state.risk_rate = live_data['risk_free_rate']
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
