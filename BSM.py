@@ -69,9 +69,11 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
-                    if st.session_state.time_to_expiry <= 252:
-                        st.session_state.risk_free_rate = yf.Ticker("^IRX")
-                    else: st.session_state.risk_free_rate = yf.Ticker("^TNX")
+                    try:
+                        if st.session_state.time_to_expiry <= 252:
+                            st.session_state.risk_free_rate = yf.Ticker("^IRX")
+                        else: 
+                            st.session_state.risk_free_rate = yf.Ticker("^TNX")
 
                     return {
                         'current_price': current_price,
