@@ -107,14 +107,6 @@ with st.sidebar:
                 st.write("#### Last 5 Days of Closing Prices")
                 st.dataframe(live_data['historical_prices'].tail())
 
-                # Allow user to input or adjust other parameters
-                col1, col2 = st.columns(2)
-                st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Strike price of the option")
-                st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
-                today_str = str(dt.today().date())
-                maturity_str = str(st.session_state.maturity_date)
-                business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-                st.session_state.time_to_expiry = business_days_to_expiry / 252
                 
 
     st.markdown("---")
