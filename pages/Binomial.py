@@ -101,10 +101,15 @@ with st.sidebar:
                     return volatility
 
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-
+                if st.session_state.time_to_expiry <= 1:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+                else:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX")
+                    
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
                 st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
                 st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
+                st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
                 st.write("#### Last 5 Days of Closing Prices")
                 st.dataframe(live_data['historical_prices'].tail())
 
