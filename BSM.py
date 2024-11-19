@@ -96,7 +96,11 @@ with st.sidebar:
                     return volatility
 
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-                      
+                if st.session_state.time_to_expiry <= 252:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+                else:
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
+
                 
                 
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
@@ -114,11 +118,7 @@ with st.sidebar:
                 maturity_str = str(st.session_state.maturity_date)
                 business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
                 st.session_state.time_to_expiry = business_days_to_expiry / 252
-                if st.session_state.time_to_expiry <= 252:
-                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
-                else:
-                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
-
+                
 
     st.markdown("---")
     st.header("Heatmap Parameters")
