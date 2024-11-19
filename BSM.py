@@ -69,21 +69,14 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
-                    try:
-                        if st.session_state.time_to_expiry <= 252:
-                            st.session_state.risk_free_rate = yf.Ticker("^IRX")
-                        else: 
-                            st.session_state.risk_free_rate = yf.Ticker("^TNX")
-                    except Exception as e:
-                        st.error(f"Error fetching data for {ticker}: {e}")
-                        return None
+                    
 
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
                         'currency': currency,
-                        'risk_free_rate' : st.session_state.risk_free_rate
                     }
+                    
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
@@ -93,7 +86,6 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
-                st.session_state.risk_rate = live_data['risk_free_rate']
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
@@ -102,7 +94,12 @@ with st.sidebar:
                     return volatility
 
                 st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-
+                      
+                if st.session_state.time_to_expiry <= 252:
+                    st.session_state.risk_free_rate = yf.Ticker("^IRX")
+                else: 
+                    st.session_state.risk_free_rate = yf.Ticker("^TNX")
+                
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
                 st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
                 st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
@@ -112,7 +109,6 @@ with st.sidebar:
                 # Allow user to input or adjust other parameters
                 col1, col2 = st.columns(2)
                 st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.spot_price, step=0.1, help="Strike price of the option")
-                st.session_state.risk_free_rate = col1.number_input("Risk Free Rate (%)", min_value=0.00, value=st.session_state.risk_free_rate, step=0.1, help="Annual risk-free interest rate in percentage (e.g., 5 for 5%)")
                 st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
                 today_str = str(dt.today().date())
                 maturity_str = str(st.session_state.maturity_date)
