@@ -32,7 +32,7 @@ with st.sidebar:
     if 'spot_price' not in st.session_state:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
-        st.session_state.strike_price = 55.00
+        st.session_state.strike_price = st.session_state.spot_price + 5
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
     def next_friday():
