@@ -104,7 +104,7 @@ with st.sidebar:
                 if st.session_state.time_to_expiry <= 1:
                     st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
                 else:
-                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX")
+                    st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
                     
                 st.success(f"Live data for {ticker.upper()} fetched successfully!")
                 st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
