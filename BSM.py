@@ -82,6 +82,40 @@ with st.sidebar:
                 st.session_state.available_expirations,
                 help="Select an expiration date from the available options",
             )
+
+            
+            if st.session_state.maturity_date:
+                # Fetch options data for the selected expiration date
+                try:
+                    stock = yf.Ticker(ticker)
+                    option_chain = stock.option_chain(maturity_date)
+                    call_strike_prices = option_chain.calls['strike'].tolist()
+                    put_strike_prices = option_chain.puts['strike'].tolist()
+
+                    st.session_state.call_strike_prices = call_strike_prices
+                    st.session_state.put_strike_prices = put_strike_prices
+
+                    st.success(f"Strike prices fetched for expiration {maturity_date}.")
+                except Exception as e:
+                    st.error(f"Error fetching strike prices: {e}")
+
+
+            if "call_strike_prices" in st.session_state:
+                selected_call_strike = st.selectbox(
+                    "Select a Call Strike Price",
+                    st.session_state.call_strike_prices,
+                    help="Choose a strike price for call options.",
+                )
+                st.write(f"You selected call strike price: {selected_call_strike}")
+
+            # Dropdown for put strike prices
+            if "put_strike_prices" in st.session_state:
+                selected_put_strike = st.selectbox(
+                    "Select a Put Strike Price",
+                    st.session_state.put_strike_prices,
+                    help="Choose a strike price for put options.",
+                )
+                st.write(f"You selected put strike price: {selected_put_strike}")
         today_str = str(dt.today().date())
         maturity_date = st.session_state.maturity_date
         maturity_str = str(st.session_state.maturity_date)
