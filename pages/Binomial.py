@@ -132,6 +132,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
+                st.session_state.put_call_ratio = live_data['put_call_ratio']
             
 
             
@@ -152,6 +153,8 @@ with st.sidebar:
             st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
             st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
             st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+            
+            st.write(f"**Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
 
             st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
             
