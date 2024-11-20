@@ -90,8 +90,8 @@ with st.sidebar:
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
-                        'currency': currency
-                        'available_expirations': available_expirations
+                        'currency': currency,
+                        'available_expirations': available_expirations,
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
