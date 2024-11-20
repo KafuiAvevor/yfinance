@@ -98,7 +98,12 @@ with st.sidebar:
                 st.session_state.available_expirations,
                 help="Select an expiration date from the available options",
             )
-
+        today_str = str(dt.today().date())
+        maturity_str = str(st.session_state.maturity_date)
+        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
+        st.session_state.time_to_expiry = business_days_to_expiry / 252
+        st.session_state.volatility = col2.number_input("Volatility (%)", min_value=0.00, value=st.session_state.volatility, step=0.1, help="Annualised volatility in percentage (e.g., 20 for 20%)")
+        st.session_state.number_of_steps = col2.number_input("Number of Steps", min_value=1, value=st.session_state.number_of_steps, step=1, help="Number of steps")
 
         st.session_state.strike_price = st.number_input("Strike Price ($)", min_value=0.00, value= st.session_state.spot_price, step=0.1, help="Strike price of the option")    
         fetch_live = st.button("Fetch Live Data")
