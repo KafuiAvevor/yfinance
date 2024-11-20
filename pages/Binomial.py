@@ -68,13 +68,8 @@ with st.sidebar:
         st.session_state.number_of_steps = col2.number_input("Number of Steps", min_value=1, value=st.session_state.number_of_steps, step=1, help="Number of steps")
    
     else:
-
-        
-
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
-        import yfinance as yf
-
         fetch_expirations = st.button("Fetch Available Maturities")
 
         if fetch_expirations:
