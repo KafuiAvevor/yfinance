@@ -74,9 +74,41 @@ with st.sidebar:
         st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value= st.session_state.spot_price, step=0.1, help="Strike price of the option")
 
+        
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
-        fetch_live = st.button("Fetch Live Data")
+        import yfinance as yf
+
+        fetch_expirations = st.button("Fetch Available Expirations")
+
+        if fetch_expirations:
+            try:
+                # Fetch available expirations for the ticker
+                stock = yf.Ticker(ticker)
+                available_expirations = stock.options  # List of expiration dates
+
+                if not available_expirations:
+                    st.error(f"No expiration dates available for {ticker}.")
+                else:
+                    st.session_state.available_expirations = available_expirations
+                    st.success(f"Available expirations for {ticker} fetched successfully!")
+            except Exception as e:
+                st.error(f"Error fetching expiration dates: {e}")
+
+        # Show dropdown only if expirations are fetched
+        if "available_expirations" in st.session_state:
+            maturity_date = st.selectbox(
+                "Pick an Expiration Date",
+                st.session_state.available_expirations,
+                help="Select an expiration date from the available options",
+            )
+
+            # Display the selected maturity date
+            if maturity_date:
+                st.write(f"You selected {maturity_date} as the expiration date.")
+
+            
+            
         if fetch_live:
             # Function to fetch live data
             @st.cache_data
