@@ -95,7 +95,7 @@ with st.sidebar:
                     st.session_state.call_strike_prices = call_strike_prices
                     st.session_state.put_strike_prices = put_strike_prices
 
-                    st.success(f"Strike prices fetched for expiration {maturity_date}.")
+                    st.success(f"Strike prices fetched for expiration {st.session_state.maturity_date}.")
                 except Exception as e:
                     st.error(f"Error fetching strike prices: {e}")
 
