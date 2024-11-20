@@ -122,7 +122,6 @@ with st.sidebar:
         business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
         st.session_state.time_to_expiry = business_days_to_expiry / 252
 
-        st.session_state.strike_price = st.number_input("Strike Price ($)", min_value=0.00, value= st.session_state.spot_price, step=0.1, help="Strike price of the option")    
         fetch_live = st.button("Fetch Live Data")
         
         if fetch_live:
