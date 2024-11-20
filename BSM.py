@@ -96,7 +96,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
-                st.session_state.put_call_ratio = live_data['put_call_ratio]
+                st.session_state.put_call_ratio = live_data['put_call_ratio']
                 
                 
                 # Function to calculate historical volatility
