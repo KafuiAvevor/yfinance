@@ -88,7 +88,7 @@ with st.sidebar:
                     }
                     
                 except Exception as e:
-                    st.error(f"Error fetching data for {ticker} or {maturity}: {e}")
+                    st.error(f"Error fetching data for {ticker} or {maturity_date}: {e}")
                     return None
             
 
