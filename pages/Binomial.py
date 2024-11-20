@@ -75,13 +75,13 @@ with st.sidebar:
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
         import yfinance as yf
 
-        fetch_expirations = st.button("Fetch Available Expirations")
+        fetch_expirations = st.button("Fetch Available Maturities")
 
         if fetch_expirations:
             try:
-                # Fetch available expirations for the ticker
+                # Fetch available maturities for the ticker
                 stock = yf.Ticker(ticker)
-                available_expirations = stock.options  # List of expiration dates
+                available_expirations = stock.options  
 
                 if not available_expirations:
                     st.error(f"No expiration dates available for {ticker}.")
@@ -94,7 +94,7 @@ with st.sidebar:
         # Show dropdown only if expirations are fetched
         if "available_expirations" in st.session_state:
             st.session_state.maturity_date = st.selectbox(
-                "Pick an Expiration Date",
+                "Pick a Maturity Date",
                 st.session_state.available_expirations,
                 help="Select an expiration date from the available options",
             )
