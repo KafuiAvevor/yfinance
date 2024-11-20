@@ -88,7 +88,7 @@ with st.sidebar:
                 # Fetch options data for the selected expiration date
                 try:
                     stock = yf.Ticker(ticker)
-                    option_chain = stock.option_chain(maturity_date)
+                    option_chain = stock.option_chain(st.session_state.maturity_date)
                     call_strike_prices = option_chain.calls['strike'].tolist()
                     put_strike_prices = option_chain.puts['strike'].tolist()
 
