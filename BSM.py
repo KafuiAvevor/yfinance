@@ -77,7 +77,7 @@ with st.sidebar:
                     current_price = hist['Close'][-1]
                     options = stock.option_chain(maturity_date)
                     puts_volume = options.puts['volume'].sum()
-                    call volume = options.calls['volume'].sum()
+                    call_volume = options.calls['volume'].sum()
                     put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
                     return {
                         'current_price': current_price,
