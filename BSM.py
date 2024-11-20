@@ -69,16 +69,22 @@ with st.sidebar:
         if fetch_live:
             # Function to fetch live data
             @st.cache_data
-            def get_live_data(ticker):
+            def get_live_data(ticker,st.session_state.maturity_date):
                 try:
                     stock = yf.Ticker(ticker)
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
+                    options = stock.option_chain(st.session_state.maturity_date)
+                    puts_volume = options.puts['volume'].sum()
+                    call volume = options.calls['volume].sum()
+                    put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
                         'currency': currency,
+                        'options': options,
+                        'put_call_ratio': put_call_ratio,
                     }
                     
                 except Exception as e:
@@ -90,7 +96,8 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
-
+                st.session_state.put_call_ratio = live_data['put_call_ratio]
+                
                 
                 # Function to calculate historical volatility
                 def calculate_historical_volatility(historical_prices):
@@ -110,8 +117,10 @@ with st.sidebar:
                 st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
                 st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
                 st.write(f"**Risk Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+                st.write(f"**Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
                 st.write("#### Last 5 Days of Closing Prices")
                 st.dataframe(live_data['historical_prices'].tail())
+                
 
                 
 
