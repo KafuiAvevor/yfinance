@@ -147,6 +147,8 @@ with st.sidebar:
             st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
             st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
             st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+
+            st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
             
             st.write("#### Last 5 Days of Closing Prices")
             st.dataframe(live_data['historical_prices'].tail())
