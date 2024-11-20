@@ -108,7 +108,7 @@ with st.sidebar:
                 st.write(f"You selected {maturity_date} as the expiration date.")
 
             
-            
+        fetch_live = st.button("Fetch Live Data")
         if fetch_live:
             # Function to fetch live data
             @st.cache_data
