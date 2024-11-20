@@ -94,6 +94,7 @@ with st.sidebar:
                 help="Select an expiration date from the available options",
             )
         today_str = str(dt.today().date())
+        maturity_date = st.session_state.maturity_date
         maturity_str = str(st.session_state.maturity_date)
         business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
         st.session_state.time_to_expiry = business_days_to_expiry / 252
@@ -104,24 +105,30 @@ with st.sidebar:
         if fetch_live:
             # Function to fetch live data
             @st.cache_data
-            def get_live_data(ticker):
+            def get_live_data(ticker, maturity_date):
                 try:
                     stock = yf.Ticker(ticker)
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
-                    available_expirations = stock.options
+                    options = stock.option_chain(maturity_date)
+                    puts_volume = options.puts['volume'].sum()
+                    call_volume = options.calls['volume'].sum()
+                    put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
+                    
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
                         'currency': currency,
+                        'put_call_ratio': put_call_ratio,
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
                     return None
             
+                    
             
-            live_data = get_live_data(ticker)
+            live_data = get_live_data(ticker, maturity_date)
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
