@@ -61,7 +61,7 @@ with st.sidebar:
         col1, col2 = st.columns(2)
         st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value=st.session_state.strike_price, step=0.1, help="Strike price of the option")
-
+        maturity_date = st.session_state.maturity_date
         
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
@@ -69,13 +69,13 @@ with st.sidebar:
         if fetch_live:
             # Function to fetch live data
             @st.cache_data
-            def get_live_data(ticker, st.session_state.maturity_date):
+            def get_live_data(ticker, maturity_date):
                 try:
                     stock = yf.Ticker(ticker)
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
-                    options = stock.option_chain(st.session_state.maturity_date)
+                    options = stock.option_chain(maturity_date)
                     puts_volume = options.puts['volume'].sum()
                     call volume = options.calls['volume'].sum()
                     put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
@@ -88,7 +88,7 @@ with st.sidebar:
                     }
                     
                 except Exception as e:
-                    st.error(f"Error fetching data for {ticker}: {e}")
+                    st.error(f"Error fetching data for {ticker} or {maturity}: {e}")
                     return None
             
 
