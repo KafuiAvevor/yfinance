@@ -86,10 +86,12 @@ with st.sidebar:
                     currency = stock.info['currency']
                     hist = stock.history(period="1y")  # 1 year of historical data
                     current_price = hist['Close'][-1]
+                    available_expirations = stock.options
                     return {
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
                         'currency': currency
+                        'available_expirations': available_expirations
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
@@ -100,6 +102,7 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
+                available_expirations = live_data['available_expirations']
 
             
                 
@@ -118,7 +121,7 @@ with st.sidebar:
             st.success(f"Live data for {ticker.upper()} fetched successfully!")
             st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
             st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
-            st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+            st.write(f"**Risk-Free Rate:** {available_expirations:,.2f}")
             st.write("#### Last 5 Days of Closing Prices")
             st.dataframe(live_data['historical_prices'].tail())
 
