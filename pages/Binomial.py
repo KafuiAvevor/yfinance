@@ -71,10 +71,8 @@ with st.sidebar:
 
         st.write("#### Manual Input Parameters")
         col1, col2 = st.columns(2)
-        st.session_state.maturity_date = col2.date_input("Maturity Date", min_value = dt.today(), value=st.session_state.maturity_date, help="Date at which the option matures")
         st.session_state.strike_price = col1.number_input("Strike Price ($)", min_value=0.00, value= st.session_state.spot_price, step=0.1, help="Strike price of the option")
 
-        
         st.write("#### Fetch Live Data")
         ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
         import yfinance as yf
@@ -97,15 +95,12 @@ with st.sidebar:
 
         # Show dropdown only if expirations are fetched
         if "available_expirations" in st.session_state:
-            maturity_date = st.selectbox(
+            st.session_state.maturity_date = st.selectbox(
                 "Pick an Expiration Date",
                 st.session_state.available_expirations,
                 help="Select an expiration date from the available options",
             )
 
-            # Display the selected maturity date
-            if maturity_date:
-                st.write(f"You selected {maturity_date} as the expiration date.")
 
             
         fetch_live = st.button("Fetch Live Data")
@@ -123,7 +118,6 @@ with st.sidebar:
                         'current_price': current_price,
                         'historical_prices': hist['Close'],
                         'currency': currency,
-                        'available_expirations': available_expirations,
                     }
                 except Exception as e:
                     st.error(f"Error fetching data for {ticker}: {e}")
@@ -134,7 +128,6 @@ with st.sidebar:
             if live_data:
                 st.session_state.spot_price = live_data['current_price']
                 st.session_state.currency = live_data['currency']
-                available_expirations = live_data['available_expirations']
 
             
                 
@@ -157,7 +150,6 @@ with st.sidebar:
             
             st.write("#### Last 5 Days of Closing Prices")
             st.dataframe(live_data['historical_prices'].tail())
-            st.dataframe(available_expirations)
 
     
 
