@@ -121,9 +121,11 @@ with st.sidebar:
             st.success(f"Live data for {ticker.upper()} fetched successfully!")
             st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
             st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
-            st.write(f"**Risk-Free Rate:** {available_expirations:,.2f}")
+            st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+            
             st.write("#### Last 5 Days of Closing Prices")
             st.dataframe(live_data['historical_prices'].tail())
+            st.dataframe(available_expirations)
 
     
 
