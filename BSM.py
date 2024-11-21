@@ -334,19 +334,15 @@ col1, col2 = st.columns(2)
 col1.metric(label="Call Delta", value=f"{greeks_call['delta_call']:,.3f}")
 col2.metric(label="Put Delta", value=f"{greeks_put['delta_put']:,.3f}")
 
-col1, col2 = st.columns(2)
 col1.metric(label="Call Gamma", value=f"{greeks_call['gamma']:,.3f}")
 col2.metric(label="Put Gamma", value=f"{greeks_put['gamma']:,.3f}")
 
-col1, col2 = st.columns(2)
-col2.metric(label="Call Vega", value=f"{greeks_call['vega']:,.3f}")
+col1.metric(label="Call Vega", value=f"{greeks_call['vega']:,.3f}")
 col2.metric(label="Put Vega", value=f"{greeks_put['vega']:,.3f}")
 
-col1, col2 = st.columns(2)
 col1.metric(label="Call Theta", value=f"{greeks_call['theta_call']:,.3f}")
 col2.metric(label="Put Theta", value=f"{greeks_put['theta_put']:,.3f}")
 
-col1, col2 = st.columns(2)
 col1.metric(label="Call Rho", value=f"{greeks_call['rho_call']:,.3f}")
 col2.metric(label="Put Rho", value=f"{greeks_put['rho_put']:,.3f}")
 
