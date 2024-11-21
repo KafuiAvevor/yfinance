@@ -110,7 +110,7 @@ with st.sidebar:
                     st.session_state.call_strike_prices,
                     help="Choose a strike price for call options.",
                 )
-                st.write(f"You selected call strike price: {selected_call_strike}")
+                st.write(f"You selected call strike price: {st.session_state.selected_call_strike}")
 
             # Dropdown for put strike prices
             if "put_strike_prices" in st.session_state:
@@ -119,7 +119,7 @@ with st.sidebar:
                     st.session_state.put_strike_prices,
                     help="Choose a strike price for put options.",
                 )
-                st.write(f"You selected put strike price: {selected_put_strike}")
+                st.write(f"You selected put strike price: {st.session_state.selected_put_strike}")
         today_str = str(dt.today().date())
         maturity_date = st.session_state.maturity_date
         maturity_str = str(st.session_state.maturity_date)
