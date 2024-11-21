@@ -240,8 +240,8 @@ put_prices = np.zeros((len(volatility_range), len(spot_range)))
 # Calculate call and put prices for each combination of volatility and spot price
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
-        call_prices[i, j] = black_scholes(spot, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="call")
-        put_prices[i, j] = black_scholes(spot, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="put")
+        call_prices[i, j] = black_scholes(spot, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="call")
+        put_prices[i, j] = black_scholes(spot, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="put")
 
 # Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(20, 8))
