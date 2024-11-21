@@ -217,7 +217,7 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
 
 # Calculate Prices
 call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
-put_price = black_scholes(st.session_state.spot_price, st.session_state.put_strike_prices, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
+put_price = black_scholes(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
 
 
 # Display the option price
