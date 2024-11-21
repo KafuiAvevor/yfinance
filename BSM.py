@@ -325,25 +325,30 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
         'vega': vega
     }
 
-greeks = calculate_greeks(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
+greeks_call = calculate_greeks(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
+greeks_put = calculate_greeks(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 
 # Display the Greeks
 st.write("### Greeks")
 col1, col2 = st.columns(2)
-col1.metric(label="Call Delta", value=f"{greeks['delta_call']:,.3f}")
-col2.metric(label="Put Delta", value=f"{greeks['delta_put']:,.3f}")
+col1.metric(label="Call Delta", value=f"{greeks_call['delta_call']:,.3f}")
+col2.metric(label="Put Delta", value=f"{greeks_put['delta_put']:,.3f}")
 
 col1, col2 = st.columns(2)
-col1.metric(label="Gamma", value=f"{greeks['gamma']:,.3f}")
-col2.metric(label="Vega", value=f"{greeks['vega']:,.3f}")
+col1.metric(label="Call Gamma", value=f"{greeks_call['gamma']:,.3f}")
+col2.metric(label="Put Gamma", value=f"{greeks_put['gamma']:,.3f}")
 
 col1, col2 = st.columns(2)
-col1.metric(label="Call Theta", value=f"{greeks['theta_call']:,.3f}")
-col2.metric(label="Put Theta", value=f"{greeks['theta_put']:,.3f}")
+col2.metric(label="Call Vega", value=f"{greeks_call['vega']:,.3f}")
+col2.metric(label="Put Vega", value=f"{greeks_put['vega']:,.3f}")
 
 col1, col2 = st.columns(2)
-col1.metric(label="Call Rho", value=f"{greeks['rho_call']:,.3f}")
-col2.metric(label="Put Rho", value=f"{greeks['rho_put']:,.3f}")
+col1.metric(label="Call Theta", value=f"{greeks_call['theta_call']:,.3f}")
+col2.metric(label="Put Theta", value=f"{greeks_put['theta_put']:,.3f}")
+
+col1, col2 = st.columns(2)
+col1.metric(label="Call Rho", value=f"{greeks_call['rho_call']:,.3f}")
+col2.metric(label="Put Rho", value=f"{greeks_put['rho_put']:,.3f}")
 
 st.markdown("---")
 st.markdown("### Developed by Kafui Avevor")
