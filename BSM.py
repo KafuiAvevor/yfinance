@@ -26,6 +26,10 @@ with st.sidebar:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
         st.session_state.strike_price = 55.00
+    if 'call_strike_price' not in st.session_state:
+        st.session_state.call_strike_prices = st.session_state.strike_price
+    if 'put_strike_price' not in st.session_state:
+        st.session_state.put_strike_prices = st.session_state.strike_price
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
     def next_friday():
@@ -212,8 +216,8 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     return price
 
 # Calculate Prices
-call_price = black_scholes(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
-put_price = black_scholes(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
+call_price = black_scholes(st.session_state.spot_price, st.session_state.call_strike_prices, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
+put_price = black_scholes(st.session_state.spot_price, st.session_state.put_strike_prices, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
 
 
 # Display the option price
