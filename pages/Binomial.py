@@ -20,7 +20,7 @@ st.markdown("### By Kafui Avevor")
 # Sidebar Inputs
 with st.sidebar:
     st.write("### Data Input Method")
-    data_input_method = st.radio( ("Live Data from Yahoo Finance"))
+    data_input_method = st.radio("Choose Data Input Method", ("Manual Input", "Live Data from Yahoo Finance"))
 
     # Initialise session state for parameters if not already set
     if 'spot_price' not in st.session_state:
