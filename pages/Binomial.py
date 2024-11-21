@@ -251,8 +251,8 @@ def binomial_american_option(spot_price, strike_price, time_to_expiry, risk_free
     return option_values[0]
 
 # Calculate Prices
-american_call_price = binomial_american_option(st.session_state.spot_price, st.session_state.strike_price,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, st.session_state.volatility/100, st.session_state.number_of_steps, option_type="call")
-american_put_price =  binomial_american_option(st.session_state.spot_price, st.session_state.strike_price, st.session_state.time_to_expiry, st.session_state.risk_free_rate/100,  st.session_state.volatility/100, st.session_state.number_of_steps, option_type="put")
+american_call_price = binomial_american_option(st.session_state.spot_price, st.session_state.selected_call_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, st.session_state.volatility/100, st.session_state.number_of_steps, option_type="call")
+american_put_price =  binomial_american_option(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.time_to_expiry, st.session_state.risk_free_rate/100,  st.session_state.volatility/100, st.session_state.number_of_steps, option_type="put")
 
 
 # Display the option price
@@ -275,8 +275,8 @@ put_prices = np.zeros((len(volatility_range), len(spot_range)))
 # Calculate call and put prices for each combination of volatility and spot price
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
-        call_prices[i, j] = binomial_american_option(spot, st.session_state.strike_price,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="call")
-        put_prices[i, j] = binomial_american_option(spot, st.session_state.strike_price,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="put")
+        call_prices[i, j] = binomial_american_option(spot, st.session_state.selected_call_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="call")
+        put_prices[i, j] = binomial_american_option(spot, st.session_state.selected_put_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="put")
 
 # Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(20, 8))
