@@ -50,36 +50,7 @@ with st.sidebar:
         st.session_state.number_of_steps = 100
     if 'currency' not in st.session_state:
         st.session_state.currency = 'USD'
-with st.sidebar:
-    st.write("### Data Input Method")
-    data_input_method = st.radio("Choose Data Input Method", ("Manual Input", "Live Data from Yahoo Finance"))
 
-    # Initialise session state for parameters if not already set
-    if 'spot_price' not in st.session_state:
-        st.session_state.spot_price = 50.00
-    if 'strike_price' not in st.session_state:
-        st.session_state.strike_price = 55.00
-    if 'selected_call_strike' not in st.session_state:
-        st.session_state.selected_call_strike = st.session_state.strike_price
-    if 'selected_put_strike' not in st.session_state:
-        st.session_state.selected_put_strike = st.session_state.strike_price
-    if 'risk_free_rate' not in st.session_state:
-        st.session_state.risk_free_rate = 5.0
-    def next_friday():
-        today = dt.today()
-        days_until_friday = (4 - today.weekday()) % 7  # 4 represents Friday (0 = Monday, 1 = Tuesday, ..., 4 = Friday)
-        return today + td(days=days_until_friday)
-    if 'maturity_date' not in st.session_state:
-        st.session_state.maturity_date = next_friday()
-    if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
-        today_str = str(dt.today().date())
-        maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
-    if 'volatility' not in st.session_state:
-        st.session_state.volatility = 20.0
-    if 'currency' not in st.session_state:
-        st.session_state.currency = 'USD'
 
     if data_input_method == "Manual Input":
         st.write("#### Manual Input Parameters")
