@@ -26,10 +26,10 @@ with st.sidebar:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
         st.session_state.strike_price = 55.00
-    if 'call_strike_price' not in st.session_state:
-        st.session_state.call_strike_prices = st.session_state.strike_price
-    if 'put_strike_price' not in st.session_state:
-        st.session_state.put_strike_prices = st.session_state.strike_price
+    if 'selected_call_strike' not in st.session_state:
+        st.session_state.selected_call_strike = st.session_state.strike_price
+    if 'selected_put_strike' not in st.session_state:
+        st.session_state.selected_put_strike = st.session_state.strike_price
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
     def next_friday():
@@ -105,7 +105,7 @@ with st.sidebar:
 
 
             if "call_strike_prices" in st.session_state:
-                selected_call_strike = st.selectbox(
+                st.session_state.selected_call_strike = st.selectbox(
                     "Select a Call Strike Price",
                     st.session_state.call_strike_prices,
                     help="Choose a strike price for call options.",
@@ -114,7 +114,7 @@ with st.sidebar:
 
             # Dropdown for put strike prices
             if "put_strike_prices" in st.session_state:
-                selected_put_strike = st.selectbox(
+                st.session_state.selected_put_strike = st.selectbox(
                     "Select a Put Strike Price",
                     st.session_state.put_strike_prices,
                     help="Choose a strike price for put options.",
@@ -216,7 +216,7 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     return price
 
 # Calculate Prices
-call_price = black_scholes(st.session_state.spot_price, st.session_state.call_strike_prices, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
+call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
 put_price = black_scholes(st.session_state.spot_price, st.session_state.put_strike_prices, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
 
 
