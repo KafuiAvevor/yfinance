@@ -33,6 +33,10 @@ with st.sidebar:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
         st.session_state.strike_price = st.session_state.spot_price + 5
+    if 'selected_call_strike' not in st.session_state:
+        st.session_state.selected_call_strike = st.session_state.strike_price
+    if 'selected_put_strike' not in st.session_state:
+        st.session_state.selected_put_strike = st.session_state.strike_price
     if 'risk_free_rate' not in st.session_state:
         st.session_state.risk_free_rate = 5.0
     def next_friday():
@@ -93,13 +97,46 @@ with st.sidebar:
                 st.session_state.available_expirations,
                 help="Select an expiration date from the available options",
             )
+
+            
+            if st.session_state.maturity_date:
+                # Fetch options data for the selected expiration date
+                try:
+                    stock = yf.Ticker(ticker)
+                    option_chain = stock.option_chain(st.session_state.maturity_date)
+                    call_strike_prices = option_chain.calls['strike'].tolist()
+                    put_strike_prices = option_chain.puts['strike'].tolist()
+
+                    st.session_state.call_strike_prices = call_strike_prices
+                    st.session_state.put_strike_prices = put_strike_prices
+
+                    st.success(f"Strike prices fetched for expiration {st.session_state.maturity_date}.")
+                except Exception as e:
+                    st.error(f"Error fetching strike prices: {e}")
+
+
+            if "call_strike_prices" in st.session_state:
+                st.session_state.selected_call_strike = st.selectbox(
+                    "Select a Call Strike Price",
+                    st.session_state.call_strike_prices,
+                    help="Choose a strike price for call options.",
+                )
+                st.write(f"You selected call strike price: {st.session_state.selected_call_strike}")
+
+            # Dropdown for put strike prices
+            if "put_strike_prices" in st.session_state:
+                st.session_state.selected_put_strike = st.selectbox(
+                    "Select a Put Strike Price",
+                    st.session_state.put_strike_prices,
+                    help="Choose a strike price for put options.",
+                )
+                st.write(f"You selected put strike price: {st.session_state.selected_put_strike}")
         today_str = str(dt.today().date())
         maturity_date = st.session_state.maturity_date
         maturity_str = str(st.session_state.maturity_date)
         business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
         st.session_state.time_to_expiry = business_days_to_expiry / 252
 
-        st.session_state.strike_price = st.number_input("Strike Price ($)", min_value=0.00, value= st.session_state.spot_price, step=0.1, help="Strike price of the option")    
         fetch_live = st.button("Fetch Live Data")
         
         if fetch_live:
@@ -160,8 +197,9 @@ with st.sidebar:
             
             st.write("#### Last 5 Days of Closing Prices")
             st.dataframe(live_data['historical_prices'].tail())
+                
 
-    
+                
 
     st.markdown("---")
     st.header("Heatmap Parameters")
@@ -309,7 +347,7 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
                  + risk_free_rate_decimal * strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2))/100
     rho_call = strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(d2) / 100  
     rho_put = -strike_price * time_to_expiry * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2) / 100
-    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry) / 100  
+    vega = spot_price * norm.pdf(d1) * np.sqrt(time_to_expiry)   
 
     return {
         'delta_call': delta_call,
@@ -322,25 +360,26 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
         'vega': vega
     }
 
-greeks = calculate_greeks(st.session_state.spot_price, st.session_state.strike_price, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
+greeks_call = calculate_greeks(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
+greeks_put = calculate_greeks(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 
 # Display the Greeks
 st.write("### Greeks")
 col1, col2 = st.columns(2)
-col1.metric(label="Call Delta", value=f"{greeks['delta_call']:,.3f}")
-col2.metric(label="Put Delta", value=f"{greeks['delta_put']:,.3f}")
+col1.metric(label="Call Delta", value=f"{greeks_call['delta_call']:,.3f}")
+col2.metric(label="Put Delta", value=f"{greeks_put['delta_put']:,.3f}")
 
-col1, col2 = st.columns(2)
-col1.metric(label="Gamma", value=f"{greeks['gamma']:,.3f}")
-col2.metric(label="Vega", value=f"{greeks['vega']:,.3f}")
+col1.metric(label="Call Gamma", value=f"{greeks_call['gamma']:,.3f}")
+col2.metric(label="Put Gamma", value=f"{greeks_put['gamma']:,.3f}")
 
-col1, col2 = st.columns(2)
-col1.metric(label="Call Theta", value=f"{greeks['theta_call']:,.3f}")
-col2.metric(label="Put Theta", value=f"{greeks['theta_put']:,.3f}")
+col1.metric(label="Call Vega", value=f"{greeks_call['vega']:,.3f}")
+col2.metric(label="Put Vega", value=f"{greeks_put['vega']:,.3f}")
 
-col1, col2 = st.columns(2)
-col1.metric(label="Call Rho", value=f"{greeks['rho_call']:,.3f}")
-col2.metric(label="Put Rho", value=f"{greeks['rho_put']:,.3f}")
+col1.metric(label="Call Theta", value=f"{greeks_call['theta_call']:,.3f}")
+col2.metric(label="Put Theta", value=f"{greeks_put['theta_put']:,.3f}")
+
+col1.metric(label="Call Rho", value=f"{greeks_call['rho_call']:,.3f}")
+col2.metric(label="Put Rho", value=f"{greeks_put['rho_put']:,.3f}")
 
 st.markdown("---")
 st.markdown("### Developed by Kafui Avevor")
