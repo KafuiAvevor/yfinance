@@ -45,142 +45,142 @@ with st.sidebar:
     if 'currency' not in st.session_state:
         st.session_state.currency = 'USD'
 
-        st.write("#### Fetch Live Data")
-        ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
-        fetch_expirations = st.button("Fetch Available Maturities")
+    st.write("#### Fetch Live Data")
+    ticker = st.text_input("Enter Stock Ticker", value="AAPL", help="Enter the ticker symbol (e.g., AAPL, MSFT, GOOG)")
+    fetch_expirations = st.button("Fetch Available Maturities")
 
-        if fetch_expirations:
-            try:
-                # Fetch available maturities for the ticker
-                stock = yf.Ticker(ticker)
-                available_expirations = stock.options  
+    if fetch_expirations:
+        try:
+            # Fetch available maturities for the ticker
+            stock = yf.Ticker(ticker)
+            available_expirations = stock.options  
 
-                if not available_expirations:
-                    st.error(f"No expiration dates available for {ticker}.")
-                else:
-                    st.session_state.available_expirations = available_expirations
-                    st.success(f"Available expirations for {ticker} fetched successfully!")
-            except Exception as e:
-                st.error(f"Error fetching expiration dates: {e}")
-
-        # Show dropdown only if expirations are fetched
-        if "available_expirations" in st.session_state:
-            st.session_state.maturity_date = st.selectbox(
-                "Pick a Maturity Date",
-                st.session_state.available_expirations,
-                help="Select an expiration date from the available options",
-            )
-
-            
-            if st.session_state.maturity_date:
-                # Fetch options data for the selected expiration date
-                try:
-                    stock = yf.Ticker(ticker)
-                    option_chain = stock.option_chain(st.session_state.maturity_date)
-                    call_strike_prices = option_chain.calls['strike'].tolist()
-                    put_strike_prices = option_chain.puts['strike'].tolist()
-
-                    st.session_state.call_strike_prices = call_strike_prices
-                    st.session_state.put_strike_prices = put_strike_prices
-
-                    st.success(f"Strike prices fetched for expiration {st.session_state.maturity_date}.")
-                except Exception as e:
-                    st.error(f"Error fetching strike prices: {e}")
-
-
-            if "call_strike_prices" in st.session_state:
-                st.session_state.selected_call_strike = st.selectbox(
-                    "Select a Call Strike Price",
-                    st.session_state.call_strike_prices,
-                    help="Choose a strike price for call options.",
-                )
-                st.write(f"You selected call strike price: {st.session_state.selected_call_strike}")
-
-            # Dropdown for put strike prices
-            if "put_strike_prices" in st.session_state:
-                st.session_state.selected_put_strike = st.selectbox(
-                    "Select a Put Strike Price",
-                    st.session_state.put_strike_prices,
-                    help="Choose a strike price for put options.",
-                )
-                st.write(f"You selected put strike price: {st.session_state.selected_put_strike}")
-        today_str = str(dt.today().date())
-        maturity_date = st.session_state.maturity_date
-        maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
-
-        fetch_live = st.button("Fetch Live Data")
-        
-        if fetch_live:
-            # Function to fetch live data
-            @st.cache_data
-            def get_live_data(ticker, maturity_date):
-                try:
-                    stock = yf.Ticker(ticker)
-                    currency = stock.info['currency']
-                    hist = stock.history(period="1y")  # 1 year of historical data
-                    current_price = hist['Close'][-1]
-                    options = stock.option_chain(maturity_date)
-                    puts_volume = options.puts['volume'].sum()
-                    call_volume = options.calls['volume'].sum()
-                    put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
-                    
-                    return {
-                        'current_price': current_price,
-                        'historical_prices': hist['Close'],
-                        'currency': currency,
-                        'put_call_ratio': put_call_ratio,
-                    }
-                except Exception as e:
-                    st.error(f"Error fetching data for {ticker}: {e}")
-                    return None
-            
-                    
-            
-            live_data = get_live_data(ticker, maturity_date)
-            if live_data:
-                st.session_state.spot_price = live_data['current_price']
-                st.session_state.currency = live_data['currency']
-                st.session_state.put_call_ratio = live_data['put_call_ratio']
-            
-
-            
-                
-            # Function to calculate historical volatility
-            def calculate_historical_volatility(historical_prices):
-                log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
-                volatility = log_returns.std() * np.sqrt(252)  # Annualise
-                return volatility
-
-            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-            if st.session_state.time_to_expiry <= 1:
-                st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+            if not available_expirations:
+                st.error(f"No expiration dates available for {ticker}.")
             else:
-                st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
+                st.session_state.available_expirations = available_expirations
+                st.success(f"Available expirations for {ticker} fetched successfully!")
+        except Exception as e:
+            st.error(f"Error fetching expiration dates: {e}")
+
+    # Show dropdown only if expirations are fetched
+    if "available_expirations" in st.session_state:
+        st.session_state.maturity_date = st.selectbox(
+        "Pick a Maturity Date",
+            st.session_state.available_expirations,
+            help="Select an expiration date from the available options",
+    )
+
+            
+        if st.session_state.maturity_date:
+            # Fetch options data for the selected expiration date
+            try:
+                stock = yf.Ticker(ticker)
+                option_chain = stock.option_chain(st.session_state.maturity_date)
+                call_strike_prices = option_chain.calls['strike'].tolist()
+                put_strike_prices = option_chain.puts['strike'].tolist()
+
+                st.session_state.call_strike_prices = call_strike_prices
+                st.session_state.put_strike_prices = put_strike_prices
+
+                st.success(f"Strike prices fetched for expiration {st.session_state.maturity_date}.")
+            except Exception as e:
+                st.error(f"Error fetching strike prices: {e}")
+
+
+        if "call_strike_prices" in st.session_state:
+            st.session_state.selected_call_strike = st.selectbox(
+                "Select a Call Strike Price",
+                st.session_state.call_strike_prices,
+                help="Choose a strike price for call options.",
+            )
+            st.write(f"You selected call strike price: {st.session_state.selected_call_strike}")
+            
+        # Dropdown for put strike prices
+        if "put_strike_prices" in st.session_state:
+            st.session_state.selected_put_strike = st.selectbox(
+            "Select a Put Strike Price",
+                st.session_state.put_strike_prices,
+                help="Choose a strike price for put options.",
+            )
+            st.write(f"You selected put strike price: {st.session_state.selected_put_strike}")
+    today_str = str(dt.today().date())
+    maturity_date = st.session_state.maturity_date
+    maturity_str = str(st.session_state.maturity_date)
+    business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
+    st.session_state.time_to_expiry = business_days_to_expiry / 252
+
+    fetch_live = st.button("Fetch Live Data")
+        
+    if fetch_live:
+        # Function to fetch live data
+        @st.cache_data
+        def get_live_data(ticker, maturity_date):
+            try:
+                stock = yf.Ticker(ticker)
+                currency = stock.info['currency']
+                hist = stock.history(period="1y")  # 1 year of historical data
+                current_price = hist['Close'][-1]
+                options = stock.option_chain(maturity_date)
+                puts_volume = options.puts['volume'].sum()
+                call_volume = options.calls['volume'].sum()
+                put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
                     
-            st.success(f"Live data for {ticker.upper()} fetched successfully!")
-            st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
-            st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
-            st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+                return {
+                    'current_price': current_price,
+                    'historical_prices': hist['Close'],
+                    'currency': currency,
+                    'put_call_ratio': put_call_ratio,
+                }
+            except Exception as e:
+                st.error(f"Error fetching data for {ticker}: {e}")
+                return None
             
-            st.write(f"**Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
+                    
+            
+        live_data = get_live_data(ticker, maturity_date)
+        if live_data:
+            st.session_state.spot_price = live_data['current_price']
+            st.session_state.currency = live_data['currency']
+            st.session_state.put_call_ratio = live_data['put_call_ratio']
+            
 
-            st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
             
-            st.write("#### Last 5 Days of Closing Prices")
-            st.dataframe(live_data['historical_prices'].tail())
+                
+        # Function to calculate historical volatility
+        def calculate_historical_volatility(historical_prices):
+            log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
+            volatility = log_returns.std() * np.sqrt(252)  # Annualise
+            return volatility
+
+        st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
+        if st.session_state.time_to_expiry <= 1:
+            st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
+        else:
+            st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
+                    
+        st.success(f"Live data for {ticker.upper()} fetched successfully!")
+        st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
+        st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
+        st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
+            
+        st.write(f"**Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
+
+        st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
+            
+        st.write("#### Last 5 Days of Closing Prices")
+        st.dataframe(live_data['historical_prices'].tail())
                 
 
                 
 
-    st.markdown("---")
-    st.header("Heatmap Parameters")
-    col1, col2 = st.columns(2)
-    min_vol = col1.slider("Min Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 0.5, step=0.1)
-    max_vol = col2.slider("Max Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 1.5, step=0.1)
-    min_spot = col1.number_input("Min Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 0.5, step=0.1)
-    max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.5, step=0.1)
+st.markdown("---")
+st.header("Heatmap Parameters")
+col1, col2 = st.columns(2)
+min_vol = col1.slider("Min Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 0.5, step=0.1)
+max_vol = col2.slider("Max Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 1.5, step=0.1)
+min_spot = col1.number_input("Min Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 0.5, step=0.1)
+max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.5, step=0.1)
 
 # Black Scholes Model Function
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
