@@ -164,7 +164,7 @@ with st.sidebar:
         st.write(f"**Historical Volatility:** {st.session_state.volatility:,.2f}%")
         st.write(f"**Risk-Free Rate:** {st.session_state.risk_free_rate:,.2f}")
             
-        st.write(f"**Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
+        st.write(f"**Open Interest Put Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
 
         st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
             
