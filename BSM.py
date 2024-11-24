@@ -120,7 +120,8 @@ with st.sidebar:
                 stock = yf.Ticker(ticker)
                 currency = stock.info['currency']
                 hist = stock.history(period="1y")  # 1 year of historical data
-                current_price = hist['Close'][-1]
+                current_price = stock.fast_info["last_price"]
+                live_price = hist['Close'][-1]
                 options = stock.option_chain(maturity_date)
                 puts_volume = options.puts['volume'].sum()
                 call_volume = options.calls['volume'].sum()
