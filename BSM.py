@@ -151,7 +151,7 @@ with st.sidebar:
             
                     
             
-        live_data = get_live_data(ticker, maturity_date)
+        live_data = get_live_data(ticker, maturity_date, call_strike, put_price)
         if live_data:
             st.session_state.spot_price = live_data['current_price']
             st.session_state.currency = live_data['currency']
