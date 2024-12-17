@@ -174,6 +174,8 @@ with st.sidebar:
         st.write(f"**Open-Interest Put-Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
 
         st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
+        st.write(f"**Implied Volatility:** {st.session_state.implied_volatility}")
+
             
         st.write("#### Last 5 Days of Closing Prices")
         st.dataframe(live_data['historical_prices'].tail())
