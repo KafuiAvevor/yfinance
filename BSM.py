@@ -105,7 +105,10 @@ with st.sidebar:
             )
             st.write(f"You selected put strike price: {st.session_state.selected_put_strike}")
     today_str = str(dt.today().date())
+    call_strike = st.session_state.selected_call_strike
+    put_strike = st.session_state.selected_put_strike
     maturity_date = st.session_state.maturity_date
+    
     maturity_str = str(st.session_state.maturity_date)
     business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
     st.session_state.time_to_expiry = business_days_to_expiry / 252
@@ -115,7 +118,7 @@ with st.sidebar:
     if fetch_live:
         # Function to fetch live data
         @st.cache_data
-        def get_live_data(ticker, maturity_date):
+        def get_live_data(ticker, maturity_date, call_strike, put_price):
             try:
                 stock = yf.Ticker(ticker)
                 currency = stock.info['currency']
@@ -126,9 +129,12 @@ with st.sidebar:
                 puts_volume = options.puts['volume'].sum()
                 call_volume = options.calls['volume'].sum()
                 put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
-                avg_iv_calls = options.calls['impliedVolatility'].mean()
-                avg_iv_puts = options.puts['impliedVolatility'].mean()
-                avg_iv = (avg_iv_calls + avg_iv_puts) / 2
+                specific_call = options.calls[(options.calls['maturity'] == maturity_date) & (options.calls['strike'] == call_strike)]
+                specific_put = options.puts[(options.puts['maturity'] == maturity_date) & (options.puts['strike'] == put_strike)]
+                iv_call = specific_call['impliedVolatility'].iloc[0]
+                iv_put = specific_put['impliedVolatility'].iloc[0]
+
+                
 
                     
                 return {
@@ -136,7 +142,8 @@ with st.sidebar:
                     'historical_prices': hist['Close'],
                     'currency': currency,
                     'put_call_ratio': put_call_ratio,
-                    'avg_iv': avg_iv,
+                    'iv_put': iv_put,
+                    'iv_call': iv_call,
                 }
             except Exception as e:
                 st.error(f"Error fetching data for {ticker}: {e}")
@@ -149,8 +156,9 @@ with st.sidebar:
             st.session_state.spot_price = live_data['current_price']
             st.session_state.currency = live_data['currency']
             st.session_state.put_call_ratio = live_data['put_call_ratio']
-            st.session_state.implied_volatility = live_data['avg_iv']
-            
+            st.session_state.implied_volatility_call = live_data['iv_call']
+            st.session_state.implied_volatility_put = live_data['iv_put']
+
 
             
                 
@@ -174,7 +182,7 @@ with st.sidebar:
         st.write(f"**Open-Interest Put-Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
 
         st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
-        st.write(f"**Implied Volatility:** {st.session_state.implied_volatility}")
+        st.write(f"**Implied Volatility Call:** {st.session_state.implied_volatility_call}")
 
             
         st.write("#### Last 5 Days of Closing Prices")
