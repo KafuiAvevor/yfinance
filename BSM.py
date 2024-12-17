@@ -111,7 +111,7 @@ with st.sidebar:
     
     maturity_str = str(st.session_state.maturity_date)
     business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-    days_to_expiry = pd.range(today_str, maturity_str).size
+    days_to_expiry = pd.date_range(today_str, maturity_str).size
     st.session_state.time_to_expiry_1 = business_days_to_expiry / 252
     st.session_state.time_to_expiry = days_to_expiry / 365
     
