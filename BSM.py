@@ -126,12 +126,17 @@ with st.sidebar:
                 puts_volume = options.puts['volume'].sum()
                 call_volume = options.calls['volume'].sum()
                 put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
+                avg_iv_calls = options.calls['impliedVolatility'].mean()
+                avg_iv_puts = options.puts['impliedVolatility'].mean()
+                avg_iv = (avg_iv_calls + avg_iv_puts) / 2
+
                     
                 return {
                     'current_price': current_price,
                     'historical_prices': hist['Close'],
                     'currency': currency,
                     'put_call_ratio': put_call_ratio,
+                    'avg_iv': avg_iv,
                 }
             except Exception as e:
                 st.error(f"Error fetching data for {ticker}: {e}")
@@ -144,6 +149,7 @@ with st.sidebar:
             st.session_state.spot_price = live_data['current_price']
             st.session_state.currency = live_data['currency']
             st.session_state.put_call_ratio = live_data['put_call_ratio']
+            st.session_state.implied_volatility = live_data['avg_iv']
             
 
             
