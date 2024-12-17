@@ -149,7 +149,11 @@ with st.sidebar:
                 st.error(f"Error fetching data for {ticker}: {e}")
                 return None
             
-                    
+        # Function to calculate historical volatility
+        def calculate_historical_volatility(historical_prices):
+            log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
+            volatility = log_returns.std() * np.sqrt(252)  # Annualise
+            return volatility            
             
         live_data = get_live_data(ticker, maturity_date, call_strike, put_strike)
         if live_data:
@@ -158,17 +162,13 @@ with st.sidebar:
             st.session_state.put_call_ratio = live_data['put_call_ratio']
             st.session_state.implied_volatility_call = live_data['iv_call']
             st.session_state.implied_volatility_put = live_data['iv_put']
+            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
 
 
             
                 
-        # Function to calculate historical volatility
-        def calculate_historical_volatility(historical_prices):
-            log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
-            volatility = log_returns.std() * np.sqrt(252)  # Annualise
-            return volatility
+        
 
-        st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
         if st.session_state.time_to_expiry <= 1:
             st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
         else:
