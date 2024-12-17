@@ -118,7 +118,7 @@ with st.sidebar:
     if fetch_live:
         # Function to fetch live data
         @st.cache_data
-        def get_live_data(ticker, maturity_date, call_strike, put_price):
+        def get_live_data(ticker, maturity_date, call_strike, put_strike):
             try:
                 stock = yf.Ticker(ticker)
                 currency = stock.info['currency']
@@ -151,7 +151,7 @@ with st.sidebar:
             
                     
             
-        live_data = get_live_data(ticker, maturity_date, call_strike, put_price)
+        live_data = get_live_data(ticker, maturity_date, call_strike, put_strike)
         if live_data:
             st.session_state.spot_price = live_data['current_price']
             st.session_state.currency = live_data['currency']
