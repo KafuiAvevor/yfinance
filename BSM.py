@@ -129,8 +129,8 @@ with st.sidebar:
                 puts_volume = options.puts['volume'].sum()
                 call_volume = options.calls['volume'].sum()
                 put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
-                specific_call = options.calls[(options.calls['maturity'] == maturity_date) & (options.calls['strike'] == call_strike)]
-                specific_put = options.puts[(options.puts['maturity'] == maturity_date) & (options.puts['strike'] == put_strike)]
+                specific_call = options.calls[options.calls['strike'] == call_strike]
+                specific_put = options.puts[options.puts['strike'] == put_strike]
                 iv_call = specific_call['impliedVolatility'].iloc[0]
                 iv_put = specific_put['impliedVolatility'].iloc[0]
 
