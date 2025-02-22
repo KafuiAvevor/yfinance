@@ -137,8 +137,7 @@ with st.sidebar:
                 put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
                 specific_call = options.calls[options.calls['strike'] == call_strike]
                 specific_put = options.puts[options.puts['strike'] == put_strike]
-                iv_call = specific_call['impliedVolatility'].iloc[0]
-                iv_put = specific_put['impliedVolatility'].iloc[0]
+                
 
                 
 
@@ -148,8 +147,7 @@ with st.sidebar:
                     'historical_prices': hist['Close'],
                     'currency': currency,
                     'put_call_ratio': put_call_ratio,
-                    'iv_put': iv_put,
-                    'iv_call': iv_call,
+                   
                 }
             except Exception as e:
                 st.error(f"Error fetching data for {ticker}: {e}")
@@ -166,8 +164,6 @@ with st.sidebar:
             st.session_state.spot_price = live_data['current_price']
             st.session_state.currency = live_data['currency']
             st.session_state.put_call_ratio = live_data['put_call_ratio']
-            st.session_state.implied_volatility_call = live_data['iv_call']
-            st.session_state.implied_volatility_put = live_data['iv_put']
             st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
 
 
@@ -188,8 +184,6 @@ with st.sidebar:
         st.write(f"**Open-Interest Put-Call Ratio:** {st.session_state.put_call_ratio:,.2f}")
 
         st.write(f"**Maturity Date:** {st.session_state.maturity_date}")
-        st.write(f"**Implied Volatility Call:** {st.session_state.implied_volatility_call*100:,.2f}")
-        st.write(f"**Implied Volatility Put:** {st.session_state.implied_volatility_put*100:,.2f}")
             
         st.write("#### Last 5 Days of Closing Prices")
         st.dataframe(live_data['historical_prices'].tail())
@@ -224,8 +218,8 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     return price
 
 # Calculate Prices
-call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.implied_volatility_call, option_type="call")
-put_price = black_scholes(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.implied_volatility_put, option_type="put")
+call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="call")
+put_price = black_scholes(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility, option_type="put")
 
 # add option combination prices, straddle etc. 
 # Display the option price
