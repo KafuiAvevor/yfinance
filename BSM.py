@@ -44,6 +44,11 @@ with st.sidebar:
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
 
+    if 'implied_volatility_put' not in st.session_state:
+        st.session_state.implied_volatility_put = 20.0
+    if 'implied_volatility_call' not in st.session_state:
+        st.session_state.implied_volatility_call = 20.0
+
     if 'currency' not in st.session_state:
         st.session_state.currency = 'USD'
 
