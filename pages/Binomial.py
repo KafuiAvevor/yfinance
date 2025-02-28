@@ -17,10 +17,8 @@ st.title("Binomial Pricing Model")
 st.markdown("### By Kafui Avevor")
 
 
-# Sidebar Inputs
 with st.sidebar:
 
-    # Initialise session state for parameters if not already set
     if 'spot_price' not in st.session_state:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
@@ -33,7 +31,7 @@ with st.sidebar:
         st.session_state.risk_free_rate = 5.0
     def next_friday():
         today = dt.today()
-        days_until_friday = (4 - today.weekday()) % 7  # 4 represents Friday (0 = Monday, 1 = Tuesday, ..., 4 = Friday)
+        days_until_friday = (4 - today.weekday()) % 7 
         return today + td(days=days_until_friday)
     if 'maturity_date' not in st.session_state:
         st.session_state.maturity_date = next_friday()
@@ -155,7 +153,7 @@ with st.sidebar:
             except Exception as e:
                 st.error(f"Error fetching data for {ticker}: {e}")
                 return None
-                # Function to calculate historical volatility
+
         def calculate_historical_volatility(historical_prices):
             log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
             volatility = log_returns.std() * np.sqrt(252)  # Annualise
@@ -169,7 +167,7 @@ with st.sidebar:
             st.session_state.put_call_ratio = live_data['put_call_ratio']
             st.session_state.implied_volatility_call = live_data['iv_call']
             st.session_state.implied_volatility_put = live_data['iv_put']
-            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
+            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100 
             
 
             
@@ -246,56 +244,45 @@ def binomial_american_option(spot_price, strike_price, time_to_expiry, risk_free
     
     return option_values[0]
 
-# Calculate Prices
 american_call_price = binomial_american_option(st.session_state.spot_price, st.session_state.selected_call_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, st.session_state.implied_volatility_call/100, st.session_state.number_of_steps, option_type="call")
 american_put_price =  binomial_american_option(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.time_to_expiry, st.session_state.risk_free_rate/100,  st.session_state.implied_volatility_put/100, st.session_state.number_of_steps, option_type="put")
 
 
-# Display the option price
+
 st.write("### Option Price (American)")
 col1, col2 = st.columns(2)
 col1.metric(label="American Call Price", value=f"{st.session_state.currency.upper()} {american_call_price:,.3f}")
 col2.metric(label="American Put Price", value=f"{st.session_state.currency.upper()} {american_put_price:,.3f}")
 
-# Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
 st.write("### Heatmaps of American Call and Put Prices with Spot Price and Volatility")
-
-# Define heatmap resolution based on user input
 spot_range = np.linspace(min_spot, max_spot, 10)  
 volatility_range = np.linspace(min_vol, max_vol, 10)
-
-# Create 2D arrays for call and put prices based on spot prices and volatilities
 call_prices = np.zeros((len(volatility_range), len(spot_range)))
 put_prices = np.zeros((len(volatility_range), len(spot_range)))
-
-# Calculate call and put prices for each combination of volatility and spot price
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
         call_prices[i, j] = binomial_american_option(spot, st.session_state.selected_call_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="call")
         put_prices[i, j] = binomial_american_option(spot, st.session_state.selected_put_strike,  st.session_state.time_to_expiry,st.session_state.risk_free_rate/100, vol/100, st.session_state.number_of_steps, option_type="put")
 
-# Plotting heatmaps
+
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(20, 8))
 
-# Plot the heatmap for Call Prices on the first subplot
+
 sns.heatmap(call_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
             yticklabels=np.round(volatility_range, 2), cmap="RdYlGn", ax=ax_call)
 ax_call.set_title('Call Option Prices Heatmap')
 ax_call.set_xlabel('Spot Price ($)')
 ax_call.set_ylabel('Volatility (%)')
 
-# Plot the heatmap for Put Prices on the second subplot
 sns.heatmap(put_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
             yticklabels=np.round(volatility_range, 2), cmap="RdYlGn", ax=ax_put)
 ax_put.set_title('Put Option Prices Heatmap')
 ax_put.set_xlabel('Spot Price ($)')
 ax_put.set_ylabel('Volatility (%)')
 
-# Adjust layout and display heatmaps
 plt.tight_layout()
 st.pyplot(fig)
 
-# Function to download heatmaps
 def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.heatmap(heatmap_data, annot=True, fmt=".2f", cmap="RdYlGn", ax=ax,
@@ -305,18 +292,12 @@ def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     plt.xlabel('Spot Price ($)')
     plt.ylabel('Volatility (%)')
     plt.tight_layout()
-
-    # Save the figure to a BytesIO object
     buf = BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
-
-    # Encode to base64
     b64 = base64.b64encode(buf.read()).decode()
     plt.close(fig)  # Close the figure to free memory
     return f'data:image/png;base64,{b64}'
-
-# Add download buttons
 if st.button("Download Call Price Heatmap"):
     call_heatmap_download = download_heatmap(call_prices, "Call Prices Heatmap", spot_range, volatility_range)
     st.markdown(f'<a href="{call_heatmap_download}" download="call_prices_heatmap.png">Download Call Prices Heatmap</a>', unsafe_allow_html=True)
@@ -324,8 +305,6 @@ if st.button("Download Call Price Heatmap"):
 if st.button("Download Put Price Heatmap"):
     put_heatmap_download = download_heatmap(put_prices, "Put Prices Heatmap", spot_range, volatility_range)
     st.markdown(f'<a href="{put_heatmap_download}" download="put_prices_heatmap.png">Download Put Prices Heatmap</a>', unsafe_allow_html=True)
-
-# Calculate the Greeks
 def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility):
     # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
@@ -359,7 +338,6 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
 greeks_call = calculate_greeks(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 greeks_put = calculate_greeks(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 
-# Display the Greeks
 st.write("### Greeks")
 col1, col2 = st.columns(2)
 col1.metric(label="Call Delta", value=f"{greeks_call['delta_call']:,.3f}")
