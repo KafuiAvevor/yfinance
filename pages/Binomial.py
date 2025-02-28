@@ -10,7 +10,6 @@ from io import BytesIO
 from datetime import datetime as dt
 from datetime import timedelta as td 
 
-# Set page configuration
 st.set_page_config(page_title="Binomial Pricing Model", layout="wide")
 
 st.title("Binomial Pricing Model")
