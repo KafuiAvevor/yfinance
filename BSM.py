@@ -35,11 +35,11 @@ with st.sidebar:
         return today + td(days=days_until_friday)
     if 'maturity_date' not in st.session_state:
         st.session_state.maturity_date = next_friday()
-    if 'time_to_expiry' not in st.session_state: #change to date time = expiry date - current date - weekends.
+    if 'time_to_expiry' not in st.session_state: 
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
+        days_to_expiry = pd.date_range(today_str, maturity_str).size
+        st.session_state.time_to_expiry = days_to_expiry / 365
     
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
@@ -117,9 +117,7 @@ with st.sidebar:
     maturity_date = st.session_state.maturity_date
     
     maturity_str = str(st.session_state.maturity_date)
-    business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
     days_to_expiry = pd.date_range(today_str, maturity_str).size
-    st.session_state.time_to_expiry_1 = business_days_to_expiry / 252
     st.session_state.time_to_expiry = days_to_expiry / 365
     
 
@@ -165,7 +163,7 @@ with st.sidebar:
         # Function to calculate historical volatility
         def calculate_historical_volatility(historical_prices):
             log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
-            volatility = log_returns.std() * np.sqrt(252)  # Annualise
+            volatility = log_returns.std() * np.sqrt(365)  
             return volatility            
             
         live_data = get_live_data(ticker, maturity_date, call_strike, put_strike)
