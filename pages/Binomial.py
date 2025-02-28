@@ -40,8 +40,8 @@ with st.sidebar:
     if 'time_to_expiry' not in st.session_state:
         today_str = str(dt.today().date())
         maturity_str = str(st.session_state.maturity_date)
-        business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
-        st.session_state.time_to_expiry = business_days_to_expiry / 252
+        days_to_expiry = pd.date_range(today_str, maturity_str).size
+        st.session_state.time_to_expiry = days_to_expiry / 365
     if 'volatility' not in st.session_state:
         st.session_state.volatility = 20.0
     if 'implied_volatility_put' not in st.session_state:
@@ -120,9 +120,7 @@ with st.sidebar:
     maturity_date = st.session_state.maturity_date
     
     maturity_str = str(st.session_state.maturity_date)
-    business_days_to_expiry = pd.bdate_range(today_str, maturity_str).size
     days_to_expiry = pd.date_range(today_str, maturity_str).size
-    st.session_state.time_to_expiry_1 = business_days_to_expiry / 252
     st.session_state.time_to_expiry = days_to_expiry / 365
     fetch_live = st.button("Fetch Live Data")
         
