@@ -10,13 +10,11 @@ from io import BytesIO
 from datetime import datetime as dt, timedelta as td
 
 
-# Set page configuration
 st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
 
 st.title("Black Scholes Pricing Model")
 st.markdown("### By Kafui Avevor")
 
-# Sidebar Inputs
 with st.sidebar:
     # Initialise session state for parameters if not already set
     if 'spot_price' not in st.session_state:
@@ -70,7 +68,6 @@ with st.sidebar:
         except Exception as e:
             st.error(f"Error fetching expiration dates: {e}")
 
-    # Show dropdown only if expirations are fetched
     if "available_expirations" in st.session_state:
         st.session_state.maturity_date = st.selectbox(
         "Pick a Maturity Date",
@@ -103,7 +100,6 @@ with st.sidebar:
             )
             st.write(f"You selected call strike price: {st.session_state.selected_call_strike}")
             
-        # Dropdown for put strike prices
         if "put_strike_prices" in st.session_state:
             st.session_state.selected_put_strike = st.selectbox(
             "Select a Put Strike Price",
@@ -160,7 +156,6 @@ with st.sidebar:
                 st.error(f"Error fetching data for {ticker}: {e}")
                 return None
             
-        # Function to calculate historical volatility
         def calculate_historical_volatility(historical_prices):
             log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
             volatility = log_returns.std() * np.sqrt(365)  
@@ -211,7 +206,6 @@ with st.sidebar:
     max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.1, step=0.1)
     
 
-# Black Scholes Model Function
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
     # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
@@ -228,56 +222,45 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
         raise ValueError("Invalid option type. Please use 'call' or 'put'.")
     return price
 
-# Calculate Prices
 call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.implied_volatility_call, option_type="call")
 put_price = black_scholes(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.implied_volatility_put, option_type="put")
 
-# add option combination prices, straddle etc. 
-# Display the option price
+
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
 col1.metric(label="European Call Price", value=f"{st.session_state.currency.upper()} {call_price:,.3f}")
 col2.metric(label="European Put Price", value=f"{st.session_state.currency.upper()} {put_price:,.3f}")
 
-# Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
 st.write("### Heatmaps of European Call and Put Prices with Spot Price and Volatility")
 
-# Define heatmap resolution based on user input
 spot_range = np.linspace(min_spot, max_spot, 10)  
 volatility_range = np.linspace(min_vol, max_vol, 10)
 
-# Create 2D arrays for call and put prices based on spot prices and volatilities
 call_prices = np.zeros((len(volatility_range), len(spot_range)))
 put_prices = np.zeros((len(volatility_range), len(spot_range)))
 
-# Calculate call and put prices for each combination of volatility and spot price
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
         call_prices[i, j] = black_scholes(spot, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="call")
         put_prices[i, j] = black_scholes(spot, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, vol, option_type="put")
 
-# Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(20, 8))
 
-# Plot the heatmap for Call Prices on the first subplot
 sns.heatmap(call_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
             yticklabels=np.round(volatility_range, 2), cmap="RdYlGn", ax=ax_call)
 ax_call.set_title('Call Option Prices Heatmap')
 ax_call.set_xlabel('Spot Price ($)')
 ax_call.set_ylabel('Volatility (%)')
 
-# Plot the heatmap for Put Prices on the second subplot
 sns.heatmap(put_prices, annot=True, fmt=".2f", xticklabels=np.round(spot_range, 2),
             yticklabels=np.round(volatility_range, 2), cmap="RdYlGn", ax=ax_put)
 ax_put.set_title('Put Option Prices Heatmap')
 ax_put.set_xlabel('Spot Price ($)')
 ax_put.set_ylabel('Volatility (%)')
 
-# Adjust layout and display heatmaps
 plt.tight_layout()
 st.pyplot(fig)
 
-# Function to download heatmaps
 def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     fig, ax = plt.subplots(figsize=(10, 6))
     sns.heatmap(heatmap_data, annot=True, fmt=".2f", cmap="RdYlGn", ax=ax,
@@ -288,17 +271,14 @@ def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     plt.ylabel('Volatility (%)')
     plt.tight_layout()
 
-    # Save the figure to a BytesIO object
     buf = BytesIO()
     plt.savefig(buf, format='png')
     buf.seek(0)
 
-    # Encode to base64
     b64 = base64.b64encode(buf.read()).decode()
     plt.close(fig)  # Close the figure to free memory
     return f'data:image/png;base64,{b64}'
 
-# Add download buttons
 if st.button("Download Call Price Heatmap"):
     call_heatmap_download = download_heatmap(call_prices, "Call Prices Heatmap", spot_range, volatility_range)
     st.markdown(f'<a href="{call_heatmap_download}" download="call_prices_heatmap.png">Download Call Prices Heatmap</a>', unsafe_allow_html=True)
@@ -307,7 +287,6 @@ if st.button("Download Put Price Heatmap"):
     put_heatmap_download = download_heatmap(put_prices, "Put Prices Heatmap", spot_range, volatility_range)
     st.markdown(f'<a href="{put_heatmap_download}" download="put_prices_heatmap.png">Download Put Prices Heatmap</a>', unsafe_allow_html=True)
 
-# Calculate the Greeks
 def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility):
     # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
