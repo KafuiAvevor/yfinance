@@ -202,8 +202,8 @@ with st.sidebar:
     col1, col2 = st.columns(2)
     min_vol = col1.slider("Min Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 0.67, step=0.1)
     max_vol = col2.slider("Max Volatility (%)", 0.00, 100.00, float(st.session_state.volatility) * 1.5, step=0.1)
-    min_spot = col1.number_input("Min Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 0.67, step=0.1)
-    max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.5, step=0.1)
+    min_spot = col1.number_input("Min Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 0.9, step=0.1)
+    max_spot = col2.number_input("Max Spot Price ($)", 0.00, 1000000.00, float(st.session_state.spot_price) * 1.1, step=0.1)
     
 
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
@@ -219,7 +219,7 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     elif option_type == "put":
         price = strike_price * np.exp(-risk_free_rate_decimal * time_to_expiry) * norm.cdf(-d2) - spot_price * norm.cdf(-d1)
     else:
-        raise ValueError("Invalid option type. Please use 'call' or 'put'.")
+        raise ValueError("Invalid option type. Please use 'call' or 'put'.")1
     return price
 
 call_price = black_scholes(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.implied_volatility_call, option_type="call")
