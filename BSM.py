@@ -136,40 +136,61 @@ with st.sidebar:
                 return df['Close'].iloc[-1]
             except Exception:
                 return default_rate
-
-        @st.cache_data
-        def get_live_data(ticker, maturity_date, call_strike, put_strike):
-            try:
-                stock = yf.Ticker(ticker, session=yf_session)                
-                currency = stock.info['currency']
-                hist = stock.history(period="1y")  # 1 year of historical data
-                current_price = stock.fast_info["last_price"]
-                close_price = hist['Close'][-1]
-                options = stock.option_chain(maturity_date)
-                puts_volume = options.puts['volume'].sum()
-                call_volume = options.calls['volume'].sum()
-                put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
-                specific_call = options.calls[options.calls['strike'] == call_strike]
-                specific_put = options.puts[options.puts['strike'] == put_strike]
+# Cached function to fetch historical prices and current price
+@st.cache_data
+def get_stock_history(ticker):
+    try:
+        stock = yf.Ticker(ticker, session=yf_session)
+        hist = stock.history(period="1y")
+        current_price = stock.fast_info.get("last_price", None)
+        currency = stock.info.get("currency", "USD")
+        return hist, current_price, currency
+    except Exception as e:
+        st.error(f"Error fetching stock history for {ticker}: {e}")
+        return pd.DataFrame(), None, "USD"
+    
+    # Cached function to fetch option chain for a specific expiry
+    @st.cache_data
+    def get_option_chain(ticker, expiry):
+        try:
+            stock = yf.Ticker(ticker, session=yf_session)
+            return stock.option_chain(expiry)
+        except Exception as e:
+            st.error(f"Error fetching option chain for {ticker} expiry {expiry}: {e}")
+            return None
+    
+    # Main function to get live data using cached helpers
+    def get_live_data(ticker, maturity_date, call_strike, put_strike):
+        hist, current_price, currency = get_stock_history(ticker)
+        options = get_option_chain(ticker, maturity_date)
+        
+        # Default values if data is missing
+        put_call_ratio = None
+        iv_call = None
+        iv_put = None
+    
+        if options is not None:
+            puts_volume = options.puts['volume'].sum() if not options.puts.empty else 0
+            call_volume = options.calls['volume'].sum() if not options.calls.empty else 0
+            put_call_ratio = puts_volume / call_volume if call_volume > 0 else None
+    
+            specific_call = options.calls[options.calls['strike'] == call_strike]
+            specific_put = options.puts[options.puts['strike'] == put_strike]
+    
+            if not specific_call.empty:
                 iv_call = specific_call['impliedVolatility'].iloc[0]
+            if not specific_put.empty:
                 iv_put = specific_put['impliedVolatility'].iloc[0]
-                
+    
+        return {
+            'current_price': current_price,
+            'historical_prices': hist['Close'] if not hist.empty else pd.Series(),
+            'currency': currency,
+            'put_call_ratio': put_call_ratio,
+            'iv_call': iv_call,
+            'iv_put': iv_put
+        }
 
-                
-
-                    
-                return {
-                    'current_price': current_price,
-                    'historical_prices': hist['Close'],
-                    'currency': currency,
-                    'put_call_ratio': put_call_ratio,
-                    'iv_put': iv_put,
-                    'iv_call': iv_call,
-                   
-                }
-            except Exception as e:
-                st.error(f"Error fetching data for {ticker}: {e}")
-                return None
             
         def calculate_historical_volatility(historical_prices):
             log_returns = np.log(historical_prices / historical_prices.shift(1)).dropna()
