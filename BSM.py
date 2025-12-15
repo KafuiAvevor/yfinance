@@ -123,8 +123,7 @@ with st.sidebar:
     if fetch_live:
         # Function to fetch live data
         def get_risk_free_rate(time_to_expiry, default_rate=5.0):
-    """Fetch short-term or long-term US risk-free rate from Yahoo Finance. Fallback to default if unavailable."""
-    
+            
             ticker_symbol = "^IRX" if time_to_expiry <= 1 else "^TNX"
             try:
                 df = yf.Ticker(ticker_symbol).history(period="1d")
