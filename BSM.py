@@ -8,6 +8,10 @@ import yfinance as yf
 import base64
 from io import BytesIO
 from datetime import datetime as dt, timedelta as td
+from curl_cffi import requests
+
+# Create a session that impersonates Chrome
+yf_session = requests.Session(impersonate="chrome")
 
 
 st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
@@ -136,7 +140,7 @@ with st.sidebar:
         @st.cache_data
         def get_live_data(ticker, maturity_date, call_strike, put_strike):
             try:
-                stock = yf.Ticker(ticker)
+                stock = yf.Ticker(ticker, session=yf_session)                
                 currency = stock.info['currency']
                 hist = stock.history(period="1y")  # 1 year of historical data
                 current_price = stock.fast_info["last_price"]
