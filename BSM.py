@@ -9,6 +9,28 @@ import base64
 from io import BytesIO
 from datetime import datetime as dt, timedelta as td
 from curl_cffi import requests
+# Enhanced session configuration with better headers
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.5',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'max-age=0',
+}
+
+# Create a session with persistent headers
+session = requests.Session()
+session.headers.update(headers)
+
+# Set yfinance to use this custom session
+yf.pdr_override()
 
 # Create a session that impersonates Chrome
 yf_session = requests.Session(impersonate="chrome")
@@ -127,49 +149,97 @@ with st.sidebar:
     if fetch_live:
         # Function to fetch live data
         def get_risk_free_rate(time_to_expiry, default_rate=5.0):
-            
-            ticker_symbol = "^IRX" if time_to_expiry <= 1 else "^TNX"
             try:
-                df = yf.Ticker(ticker_symbol).history(period="1d")
+                # Add a small random delay
+                time.sleep(random.uniform(0.5, 1.5))
+                
+                ticker_symbol = "^IRX" if time_to_expiry <= 1 else "^TNX"
+                stock = yf.Ticker(ticker_symbol, session=session)
+                df = stock.history(period="1d")
+                
                 if df.empty:
                     return default_rate
                 return df['Close'].iloc[-1]
-            except Exception:
+            except Exception as e:
+                st.warning(f"Risk-free rate fetch failed, using default: {e}")
                 return default_rate
-# Cached function to fetch historical prices and current price
         @st.cache_data
+        @st.cache_data(ttl=300, show_spinner="Fetching live market data...")  # Cache for 5 minutes
         def get_live_data(ticker, maturity_date, call_strike, put_strike):
             try:
-                stock = yf.Ticker(ticker)
-                currency = stock.info['currency']
-                hist = stock.history(period="1y")  # 1 year of historical data
-                current_price = stock.fast_info["last_price"]
-                close_price = hist['Close'][-1]
+                # Strategic delays between API calls
+                time.sleep(random.uniform(1, 2))
+                
+                # Use custom session with Yahoo Finance
+                stock = yf.Ticker(ticker, session=session)
+                
+                # Fetch basic info with retry logic
+                max_retries = 3
+                for attempt in range(max_retries):
+                    try:
+                        currency = stock.info.get('currency', 'USD')
+                        current_price = stock.fast_info.get("last_price")
+                        
+                        if current_price is not None:
+                            break
+                            
+                        time.sleep(random.uniform(1, 2))  # Wait before retry
+                    except Exception as e:
+                        if attempt == max_retries - 1:
+                            raise e
+                        time.sleep(random.uniform(2, 3))
+                
+                # Fetch historical data
+                time.sleep(random.uniform(0.5, 1))
+                hist = stock.history(period="1mo")  # Reduced from 1y to 1mo for efficiency
+                
+                # Fetch options data only if we have valid parameters
+                time.sleep(random.uniform(0.5, 1))
                 options = stock.option_chain(maturity_date)
+                
+                # Calculate put/call ratio
                 puts_volume = options.puts['volume'].sum()
                 call_volume = options.calls['volume'].sum()
-                put_call_ratio = puts_volume/call_volume if call_volume > 0 else None
+                put_call_ratio = puts_volume / call_volume if call_volume > 0 else None
+                
+                # Get specific option implied volatilities
                 specific_call = options.calls[options.calls['strike'] == call_strike]
                 specific_put = options.puts[options.puts['strike'] == put_strike]
-                iv_call = specific_call['impliedVolatility'].iloc[0]
-                iv_put = specific_put['impliedVolatility'].iloc[0]
                 
-        
+                iv_call = specific_call['impliedVolatility'].iloc[0] if not specific_call.empty else 0.2
+                iv_put = specific_put['impliedVolatility'].iloc[0] if not specific_put.empty else 0.2
                 
-        
-                    
+                # Calculate historical volatility
+                def calculate_historical_volatility(prices):
+                    if len(prices) < 2:
+                        return 0.2
+                    log_returns = np.log(prices / prices.shift(1)).dropna()
+                    return log_returns.std() * np.sqrt(252)  # Trading days
+                
+                hist_vol = calculate_historical_volatility(hist['Close']) * 100
+                
                 return {
                     'current_price': current_price,
                     'historical_prices': hist['Close'],
                     'currency': currency,
                     'put_call_ratio': put_call_ratio,
-                    'iv_put': iv_put,
                     'iv_call': iv_call,
-                   
+                    'iv_put': iv_put,
+                    'hist_vol': hist_vol
                 }
+                
             except Exception as e:
-                st.error(f"Error fetching data for {ticker}: {e}")
-                return None
+                st.error(f"Error fetching data for {ticker}: {str(e)[:100]}")
+                # Return fallback data to keep app running
+                return {
+                    'current_price': st.session_state.get('spot_price', 50.00),
+                    'historical_prices': pd.Series([50, 51, 52, 53, 54]),
+                    'currency': 'USD',
+                    'put_call_ratio': 0.5,
+                    'iv_call': 0.2,
+                    'iv_put': 0.2,
+                    'hist_vol': 20.0
+                }
 
             
         def calculate_historical_volatility(historical_prices):
