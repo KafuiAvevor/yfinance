@@ -85,7 +85,6 @@ with st.sidebar:
             # Fetch available maturities for the ticker
             stock = yf.Ticker(ticker)
             available_expirations = stock.options  
-
             if not available_expirations:
                 st.error(f"No expiration dates available for {ticker}.")
             else:
