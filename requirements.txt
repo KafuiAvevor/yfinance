@@ -64,3 +64,4 @@ webencodings==0.5.1
 yfinance==0.2.66
 datetime 
 timedelta
+curl-cffi
