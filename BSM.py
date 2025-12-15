@@ -122,6 +122,18 @@ with st.sidebar:
         
     if fetch_live:
         # Function to fetch live data
+        def get_risk_free_rate(time_to_expiry, default_rate=5.0):
+    """Fetch short-term or long-term US risk-free rate from Yahoo Finance. Fallback to default if unavailable."""
+    
+            ticker_symbol = "^IRX" if time_to_expiry <= 1 else "^TNX"
+            try:
+                df = yf.Ticker(ticker_symbol).history(period="1d")
+                if df.empty:
+                    return default_rate
+                return df['Close'].iloc[-1]
+            except Exception:
+                return default_rate
+
         @st.cache_data
         def get_live_data(ticker, maturity_date, call_strike, put_strike):
             try:
@@ -169,16 +181,8 @@ with st.sidebar:
             st.session_state.implied_volatility_call = live_data['iv_call']
             st.session_state.implied_volatility_put = live_data['iv_put']
             st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
+            st.session_state.risk_free_rate = get_risk_free_rate(st.session_state.time_to_expiry)
 
-
-            
-                
-        
-
-        if st.session_state.time_to_expiry <= 1:
-            st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
-        else:
-            st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^TNX").history(period="1d")['Close'].iloc[-1] 
                     
         st.success(f"Live data for {ticker.upper()} fetched successfully!")
         st.write(f"**Current Spot Price:** {st.session_state.currency.upper()} {st.session_state.spot_price:,.2f}")
