@@ -8,7 +8,10 @@ import yfinance as yf
 import base64
 from io import BytesIO
 from datetime import datetime as dt, timedelta as td
-from curl_cffi import requests
+import requests
+import time
+import random
+
 # Enhanced session configuration with better headers
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
@@ -29,11 +32,8 @@ headers = {
 session = requests.Session()
 session.headers.update(headers)
 
-# Set yfinance to use this custom session
-yf.pdr_override()
-
-# Create a session that impersonates Chrome
-yf_session = requests.Session(impersonate="chrome")
+# Create cookie for the session
+session.cookies.set('B', 'your_cookie_value_here', domain='.yahoo.com')
 
 
 st.set_page_config(page_title="Black-Scholes Pricing Model", layout="wide")
