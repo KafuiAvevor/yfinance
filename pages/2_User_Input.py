@@ -32,8 +32,8 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
         raise ValueError("Invalid option type. Please use 'call' or 'put'.")
     return price 
 
-call_price = black_scholes(spot_price, strike_price, (risk_free_rate/100), time_to_expiry, (volatility/100))
-put_price = black_scholes(spot_price, strike_price, (risk_free_rate/100), time_to_expiry, (volatility/100), option_type="put")
+call_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility)
+put_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="put")
 
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
@@ -58,8 +58,8 @@ put_prices = np.zeros((len(volatility_range), len(spot_range)))
 
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
-        call_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol/100)
-        put_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol/100, option_type="put")
+        call_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol)
+        put_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol, option_type="put")
 
 # Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(16, 6))
