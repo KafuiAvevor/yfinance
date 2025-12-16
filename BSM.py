@@ -16,7 +16,6 @@ st.title("Black Scholes Pricing Model")
 st.markdown("### By Kafui Avevor")
 
 with st.sidebar:
-    # Initialise session state for parameters if not already set
     if 'spot_price' not in st.session_state:
         st.session_state.spot_price = 50.00
     if 'strike_price' not in st.session_state:
@@ -56,7 +55,6 @@ with st.sidebar:
 
     if fetch_expirations:
         try:
-            # Fetch available maturities for the ticker
             stock = yf.Ticker(ticker)
             available_expirations = stock.options  
 
@@ -77,7 +75,6 @@ with st.sidebar:
 
             
         if st.session_state.maturity_date:
-            # Fetch options data for the selected expiration date
             try:
                 stock = yf.Ticker(ticker)
                 option_chain = stock.option_chain(st.session_state.maturity_date)
@@ -121,13 +118,12 @@ with st.sidebar:
     fetch_live = st.button("Fetch Live Data")
         
     if fetch_live:
-        # Function to fetch live data
         @st.cache_data
         def get_live_data(ticker, maturity_date, call_strike, put_strike):
             try:
                 stock = yf.Ticker(ticker)
                 currency = stock.info['currency']
-                hist = stock.history(period="1y")  # 1 year of historical data
+                hist = stock.history(period="1y") 
                 current_price = stock.fast_info["last_price"]
                 close_price = hist['Close'][-1]
                 options = stock.option_chain(maturity_date)
@@ -168,12 +164,7 @@ with st.sidebar:
             st.session_state.put_call_ratio = live_data['put_call_ratio']
             st.session_state.implied_volatility_call = live_data['iv_call']
             st.session_state.implied_volatility_put = live_data['iv_put']
-            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  # Convert to percentage
-
-
-            
-                
-        
+            st.session_state.volatility = calculate_historical_volatility(live_data['historical_prices']) * 100  
 
         if st.session_state.time_to_expiry <= 1:
             st.session_state.risk_free_rate = st.session_state.risk_free_rate = yf.Ticker("^IRX").history(period="1d")['Close'].iloc[-1] 
@@ -194,9 +185,6 @@ with st.sidebar:
         st.write("#### Last 5 Days of Closing Prices")
         st.dataframe(live_data['historical_prices'].tail())
                 
-
-                
-
     st.markdown("---")
     st.header("Heatmap Parameters")
     col1, col2 = st.columns(2)
@@ -207,7 +195,6 @@ with st.sidebar:
     
 
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
-    # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
     volatility_decimal = volatility / 100
 
@@ -276,7 +263,7 @@ def download_heatmap(heatmap_data, title, spot_range, volatility_range):
     buf.seek(0)
 
     b64 = base64.b64encode(buf.read()).decode()
-    plt.close(fig)  # Close the figure to free memory
+    plt.close(fig)  
     return f'data:image/png;base64,{b64}'
 
 if st.button("Download Call Price Heatmap"):
@@ -288,7 +275,6 @@ if st.button("Download Put Price Heatmap"):
     st.markdown(f'<a href="{put_heatmap_download}" download="put_prices_heatmap.png">Download Put Prices Heatmap</a>', unsafe_allow_html=True)
 
 def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility):
-    # Convert percentages to decimals
     risk_free_rate_decimal = risk_free_rate / 100
     volatility_decimal = volatility / 100
 
@@ -320,7 +306,6 @@ def calculate_greeks(spot_price, strike_price, risk_free_rate, time_to_expiry, v
 greeks_call = calculate_greeks(st.session_state.spot_price, st.session_state.selected_call_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 greeks_put = calculate_greeks(st.session_state.spot_price, st.session_state.selected_put_strike, st.session_state.risk_free_rate, st.session_state.time_to_expiry, st.session_state.volatility)
 
-# Display the Greeks
 st.write("### Greeks")
 col1, col2 = st.columns(2)
 col1.metric(label="Call Delta", value=f"{greeks_call['delta_call']:,.3f}")
