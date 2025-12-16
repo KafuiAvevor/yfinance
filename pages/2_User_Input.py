@@ -37,8 +37,8 @@ put_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expi
 
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
-col1.metric(label="European Call Price", value=f"GBP{call_price:,.3f}")
-col2.metric(label="European Put Price", value=f"GBP{put_price:,.3f}")
+col1.metric(label="European Call Price", value=f"GBP {call_price:,.3f}")
+col2.metric(label="European Put Price", value=f"GBP {put_price:,.3f}")
 
 with st.sidebar:
     st.write("### Heatmap Parameters")
@@ -139,4 +139,4 @@ col2.metric(label="Put Rho", value=f"{rho_put:,.3f}")
 
 st.markdown("---")
 st.markdown("### Developed by Kafui Avevor")
-st.markdown("### [LinkedIn](https://www.linkedin.com/in/kafui-avevor/) | [GitHub](https://github.com/kafuiavevor)")
+st.markdown("### [LinkedIn](https://www.linkedin.com/in/kafui-avevor-b5b339247/) | [GitHub](https://github.com/kafuiavevor)")
