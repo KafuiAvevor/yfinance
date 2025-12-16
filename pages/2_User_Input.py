@@ -13,8 +13,6 @@ st.set_page_config(page_title="Black Scholes Pricing Model (User Input)", layout
 st.title("Black Scholes Pricing Model (User Input)")
 st.markdown("### By Kafui Avevor")
 with st.sidebar:
-    st.title("Black Scholes Pricing Model")
-    st.subheader("By Kafui Avevor")
     st.write("### Input Data")
     col1, col2 = st.columns(2)
     spot_price = col1.number_input("Spot Price", min_value=0.00, value=50.00)
@@ -23,9 +21,6 @@ with st.sidebar:
     time_to_expiry = col2.number_input("Time to Expiry (in years)", min_value=0.00, value=1.00)
     volatility = col2.number_input("Volatility", min_value=0.00, value=0.2)
 
-
-
-# Black Scholes Model
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
     d1 = (np.log(spot_price / strike_price) + (risk_free_rate + volatility**2 / 2) * time_to_expiry) / (volatility * np.sqrt(time_to_expiry))
     d2 = d1 - volatility * np.sqrt(time_to_expiry)
@@ -37,15 +32,13 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
         raise ValueError("Invalid option type. Please use 'call' or 'put'.")
     return price 
 
-# Display the option price
 call_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility)
 put_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="put")
 
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
-col1.metric(label="European Call Price", value=f"${call_price:,.3f}")
-col2.metric(label="European Put Price", value=f"${put_price:,.3f}")
-
+col1.metric(label="European Call Price", value=f"GBP{call_price:,.3f}")
+col2.metric(label="European Put Price", value=f"GBP{put_price:,.3f}")
 
 with st.sidebar:
     st.write("### Heatmap Parameters")
@@ -53,7 +46,7 @@ with st.sidebar:
     max_vol = st.slider("Max Volatility",0.00, 1.00, volatility*1.5)
     min_spot = st.number_input("Min Spot Price",0.00, 1000.00, spot_price*0.5)
     max_spot = st.number_input("Max Spot Price",0.00, 1000.00, spot_price*1.5)
-# Generate the heatmap data (for Call and Put Prices with different Spot Prices and Volatilities)
+
 st.write("### Heatmaps of European Call and Put Prices with Spot Price and Volatility")
 
 spot_range = np.linspace(min_spot, max_spot, 10)  # 10 different spot prices
