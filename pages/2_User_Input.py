@@ -17,7 +17,7 @@ with st.sidebar:
     col1, col2 = st.columns(2)
     spot_price = col1.number_input("Spot Price", min_value=0.00, value=50.00)
     strike_price = col1.number_input("Strike Price", min_value=0.00, value=55.00)
-    risk_free_rate = col1.number_input("Risk Free Rate", min_value=0.00, value=5)
+    risk_free_rate = col1.number_input("Risk Free Rate", min_value=0.00, value=5.00)
     time_to_expiry = col2.number_input("Time to Expiry (in years)", min_value=0.00, value=1.00)
     volatility = col2.number_input("Volatility", min_value=0.00, value=20.00)
 
