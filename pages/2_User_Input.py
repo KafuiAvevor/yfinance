@@ -25,9 +25,9 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
     d1 = (np.log(spot_price / strike_price) + ((risk_free_rate/100) + (volatility/100)**2 / 2) * time_to_expiry) / ((volatility/100) * np.sqrt(time_to_expiry))
     d2 = d1 - (volatility/100) * np.sqrt(time_to_expiry)
     if option_type == "call":
-        price = spot_price * norm.cdf(d1) - strike_price * np.exp(-risk_free_rate * time_to_expiry) * norm.cdf(d2)
+        price = spot_price * norm.cdf(d1) - strike_price * np.exp(-(risk_free_rate/100) * time_to_expiry) * norm.cdf(d2)
     elif option_type == "put":
-        price = strike_price * np.exp(-risk_free_rate * time_to_expiry) * norm.cdf(-d2) - spot_price * norm.cdf(-d1)
+        price = strike_price * np.exp(-(risk_free_rate/100) * time_to_expiry) * norm.cdf(-d2) - spot_price * norm.cdf(-d1)
     else:
         raise ValueError("Invalid option type. Please use 'call' or 'put'.")
     return price 
