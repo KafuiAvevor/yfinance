@@ -8,7 +8,9 @@ import math
 import base64
 from io import BytesIO
 
-st.title("Black Scholes Pricing Model")
+st.set_page_config(page_title="Black Scholes Pricing Model (User Input)", layout="wide")
+
+st.title("Black Scholes Pricing Model (User Input)")
 st.markdown("### By Kafui Avevor")
 with st.sidebar:
     st.title("Black Scholes Pricing Model")
