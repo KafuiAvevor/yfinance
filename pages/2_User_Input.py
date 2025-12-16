@@ -42,8 +42,8 @@ col2.metric(label="European Put Price", value=f"GBP {put_price:,.3f}")
 
 with st.sidebar:
     st.write("### Heatmap Parameters")
-    min_vol = st.slider("Min Volatility", 0.0, 100, min(volatility*0.5),100)
-    max_vol = st.slider("Max Volatility",0.00, 100, min(volatility*1.5),100)
+    min_vol = st.slider("Min Volatility", 0.0, 100, min((volatility*0.5),100)
+    max_vol = st.slider("Max Volatility",0.00, 100, min((volatility*1.5),100)
     min_spot = st.number_input("Min Spot Price",0.00, 1000000.00, spot_price*0.5)
     max_spot = st.number_input("Max Spot Price",0.00, 1000000.00, spot_price*1.5)
 
