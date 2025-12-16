@@ -17,13 +17,13 @@ with st.sidebar:
     col1, col2 = st.columns(2)
     spot_price = col1.number_input("Spot Price", min_value=0.00, value=50.00)
     strike_price = col1.number_input("Strike Price", min_value=0.00, value=55.00)
-    risk_free_rate = col1.number_input("Risk Free Rate", min_value=0.00, value=0.05)
+    risk_free_rate = col1.number_input("Risk Free Rate", min_value=0.00, value=5)
     time_to_expiry = col2.number_input("Time to Expiry (in years)", min_value=0.00, value=1.00)
-    volatility = col2.number_input("Volatility", min_value=0.00, value=0.2)
+    volatility = col2.number_input("Volatility", min_value=0.00, value=20.00)
 
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
-    d1 = (np.log(spot_price / strike_price) + (risk_free_rate + volatility**2 / 2) * time_to_expiry) / (volatility * np.sqrt(time_to_expiry))
-    d2 = d1 - volatility * np.sqrt(time_to_expiry)
+    d1 = (np.log(spot_price / strike_price) + ((risk_free_rate/100) + (volatility/100)**2 / 2) * time_to_expiry) / (volatility * np.sqrt(time_to_expiry))
+    d2 = d1 - (volatility/100) * np.sqrt(time_to_expiry)
     if option_type == "call":
         price = spot_price * norm.cdf(d1) - strike_price * np.exp(-risk_free_rate * time_to_expiry) * norm.cdf(d2)
     elif option_type == "put":
@@ -32,8 +32,8 @@ def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, vola
         raise ValueError("Invalid option type. Please use 'call' or 'put'.")
     return price 
 
-call_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility)
-put_price = black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="put")
+call_price = black_scholes(spot_price, strike_price, (risk_free_rate/100), time_to_expiry, (volatility/100))
+put_price = black_scholes(spot_price, strike_price, (risk_free_rate/100), time_to_expiry, (volatility/100), option_type="put")
 
 st.write("### Option Price (European)")
 col1, col2 = st.columns(2)
@@ -42,10 +42,10 @@ col2.metric(label="European Put Price", value=f"GBP {put_price:,.3f}")
 
 with st.sidebar:
     st.write("### Heatmap Parameters")
-    min_vol = st.slider("Min Volatility", 0.00, 1.00, volatility*0.5)
-    max_vol = st.slider("Max Volatility",0.00, 1.00, volatility*1.5)
-    min_spot = st.number_input("Min Spot Price",0.00, 1000.00, spot_price*0.5)
-    max_spot = st.number_input("Max Spot Price",0.00, 1000.00, spot_price*1.5)
+    min_vol = st.slider("Min Volatility", 0.0, 100, max(volatility*0.5),100)
+    max_vol = st.slider("Max Volatility",0.00, 100, max(volatility*1.5),100)
+    min_spot = st.number_input("Min Spot Price",0.00, 1000000.00, spot_price*0.5)
+    max_spot = st.number_input("Max Spot Price",0.00, 1000000.00, spot_price*1.5)
 
 st.write("### Heatmaps of European Call and Put Prices with Spot Price and Volatility")
 
@@ -58,8 +58,8 @@ put_prices = np.zeros((len(volatility_range), len(spot_range)))
 
 for i, vol in enumerate(volatility_range):
     for j, spot in enumerate(spot_range):
-        call_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol)
-        put_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol, option_type="put")
+        call_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol/100)
+        put_prices[i, j] = black_scholes(spot, strike_price, risk_free_rate, time_to_expiry, vol/100, option_type="put")
 
 # Plotting heatmaps
 fig, (ax_call, ax_put) = plt.subplots(1, 2, figsize=(16, 6))
@@ -109,15 +109,15 @@ if st.button("Download Put Price Heatmap"):
     put_heatmap_download = download_heatmap(put_prices, "Put Prices Heatmap")
     st.markdown(f'<a href="{put_heatmap_download}" download="put_prices_heatmap.png">Download Put Prices Heatmap</a>', unsafe_allow_html=True)
 #Calculate the Greeks
-d1 = (np.log(spot_price / strike_price) + (risk_free_rate + volatility**2 / 2) * time_to_expiry) / (volatility * np.sqrt(time_to_expiry))
-d2 = d1 - volatility * np.sqrt(time_to_expiry)
+d1 = (np.log(spot_price / strike_price) + ((risk_free_rate/100) + (volatility/100)**2 / 2) * time_to_expiry) / ((volatility/100) * np.sqrt(time_to_expiry))
+d2 = d1 - (volatility/100) * np.sqrt(time_to_expiry)
 delta_call = norm.cdf(d1)
 delta_put = norm.cdf(d1)-1
-gamma = norm.pdf(d1) / (spot_price * volatility *(np.sqrt(time_to_expiry)))
-theta_call = -((spot_price*norm.pdf(d1)*volatility)/(2*np.sqrt(time_to_expiry))) - risk_free_rate *strike_price*np.exp(-risk_free_rate*time_to_expiry)*norm.cdf(d2)/100 
-theta_put = -((spot_price*norm.pdf(d1)*volatility)/(2*np.sqrt(time_to_expiry))) + risk_free_rate *strike_price*np.exp(-risk_free_rate*time_to_expiry)*norm.cdf(-d2)/100
-rho_call = 0.01*strike_price*time_to_expiry* np.exp(-risk_free_rate*time_to_expiry) * norm.cdf(d2)
-rho_put = -0.01*(strike_price*time_to_expiry* np.exp(-risk_free_rate*time_to_expiry) * norm.cdf(-d2))
+gamma = norm.pdf(d1) / (spot_price * (volatility/100) *(np.sqrt(time_to_expiry)))
+theta_call = -((spot_price*norm.pdf(d1)*(volatility/100))/(2*np.sqrt(time_to_expiry))) - (risk_free_rate/100) *strike_price*np.exp(-(risk_free_rate/100)*time_to_expiry)*norm.cdf(d2)/100 
+theta_put = -((spot_price*norm.pdf(d1)*(volatility/100))/(2*np.sqrt(time_to_expiry))) + (risk_free_rate/100) *strike_price*np.exp(-(risk_free_rate/100)*time_to_expiry)*norm.cdf(-d2)/100
+rho_call = 0.01*strike_price*time_to_expiry* np.exp(-(risk_free_rate/100)*time_to_expiry) * norm.cdf(d2)
+rho_put = -0.01*(strike_price*time_to_expiry* np.exp(-(risk_free_rate/100)*time_to_expiry) * norm.cdf(-d2))
 vega = 0.01*spot_price*norm.pdf(d1)*np.sqrt(time_to_expiry)
 st.write("### Greeks")
 
