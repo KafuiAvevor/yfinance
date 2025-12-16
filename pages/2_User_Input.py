@@ -20,7 +20,7 @@ with st.sidebar:
     risk_free_rate = col1.number_input("Risk Free Rate", min_value=0.00, value=5.00)
     time_to_expiry_days = col2.number_input("Time to Expiry (in days)", min_value=0.00, value=252)
     volatility = col2.number_input("Volatility", min_value=0.00, value=20.00)
-time_to expiry = time_to_expiry_days/252
+time_to_expiry = time_to_expiry_days/252
 def black_scholes(spot_price, strike_price, risk_free_rate, time_to_expiry, volatility, option_type="call"):
     d1 = (np.log(spot_price / strike_price) + ((risk_free_rate/100) + (volatility/100)**2 / 2) * time_to_expiry) / ((volatility/100) * np.sqrt(time_to_expiry))
     d2 = d1 - (volatility/100) * np.sqrt(time_to_expiry)
